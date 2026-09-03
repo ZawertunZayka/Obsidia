@@ -20,6 +20,8 @@ Updated: 2026-09-03
   timeout retries and automatic rediscovery without UI or GPIO coupling.
 - Main-S3 `FpgaService` validates identity/version/readiness, detects resets,
   rediscovers the FPGA and exposes bounded FIFO/control operations.
+- `OBSIDIA DIAGNOSTICS` has a fixed 20-component model plus an `OBSIDIA_V1`-only
+  Bruce menu; unknown hardware remains visibly UNTESTED/N/A rather than passing.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -36,6 +38,8 @@ Updated: 2026-09-03
 | Radio MCU firmware | pass | build | PlatformIO `obsidia-radio` success; 289,780 B flash, 22,244 B RAM |
 | Main RadioService | pass | host/build | State-machine tests pass and complete Bruce control build succeeds |
 | Main FpgaService | pass | host/build | Recovery/FIFO/control tests pass and complete Bruce control build succeeds |
+| Diagnostics model | pass | host/build | Inventory/mapping/bounds tests pass; S3 object compiles |
+| Diagnostics UI | pending target | build guard | Menu is isolated behind `OBSIDIA_V1`; target awaits board identity |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |

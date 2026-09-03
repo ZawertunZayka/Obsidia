@@ -5,6 +5,9 @@
 
 MainMenu::MainMenu() {
     _menuItems = {
+#ifdef OBSIDIA_V1
+        &obsidiaDiagnosticsMenu,
+#endif
         &wifiMenu,
         &bleMenu,
         &rfMenu,

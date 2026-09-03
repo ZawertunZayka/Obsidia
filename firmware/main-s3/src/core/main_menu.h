@@ -19,6 +19,9 @@
 #include "menu_items/RFMenu.h"
 #include "menu_items/ScriptsMenu.h"
 #include "menu_items/WifiMenu.h"
+#ifdef OBSIDIA_V1
+#include "obsidia/diagnostics/ObsidiaDiagnosticsMenu.h"
+#endif
 class MainMenu {
 public:
     FileMenu fileMenu;
@@ -35,6 +38,9 @@ public:
     RFMenu rfMenu;
     ScriptsMenu scriptsMenu;
     WifiMenu wifiMenu;
+#ifdef OBSIDIA_V1
+    ObsidiaDiagnosticsMenu obsidiaDiagnosticsMenu;
+#endif
 #if !defined(LITE_VERSION)
     LoRaMenu loraMenu;
     EthernetMenu ethernetMenu;
