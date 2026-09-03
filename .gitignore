@@ -1,0 +1,14 @@
+.pio/
+.vscode/
+build/
+dist/
+*.bin
+*.elf
+*.map
+*.fs
+*.o
+*.d
+__pycache__/
+.pytest_cache/
+.DS_Store
+firmware/main-s3/upstream/.pio/
