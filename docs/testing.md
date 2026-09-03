@@ -21,5 +21,7 @@ Only the last three levels establish hardware success. Each result in
 - Radio ESP32: protocol loopback/PING and standalone peripheral probes.
 - CC1101 standalone: reset-ready timeout, PARTNUM/VERSION identity, reversible
   PKTLEN register write/read/restore and valid MARCSTATE without RF transmission.
+- NRF24 standalone: STATUS and reserved-bit sanity, CONFIG/RF_SETUP reads and a
+  reversible RF_CH write/read/restore while CE remains low.
 - Final: cold boot, repeated reset, USB reconnect, long runtime, concurrent
   initialization and independent coprocessor resets.

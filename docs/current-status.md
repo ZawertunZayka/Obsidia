@@ -27,6 +27,8 @@ Updated: 2026-09-03
 - CC1101 standalone diagnostic implements bounded raw-SPI reset/ready timing,
   identity reads, reversible register verification and MARCSTATE validation;
   no RF operation is enabled and all GPIO remain unset.
+- NRF24L01+ standalone diagnostic validates STATUS/register reserved bits and a
+  reversible RF_CH write with CE held low; it performs no receive/transmit work.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -49,6 +51,8 @@ Updated: 2026-09-03
 | RDM6300 hardware | pending wiring | none | RX GPIO unset; no physical tag evidence |
 | CC1101 diagnostic | pass | host/build | Failure paths and register restoration tested; ESP32 build succeeds |
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
+| NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
+| NRF24 hardware | pending wiring/power | none | GPIO unset; PA/LNA supply and decoupling unverified |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |

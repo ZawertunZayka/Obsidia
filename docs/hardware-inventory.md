@@ -16,3 +16,8 @@
 
 No USB serial device was visible from the current sandbox during the initial
 audit, so chip, flash and PSRAM probing has not yet produced hardware evidence.
+
+The NRF24L01+ PA/LNA module must not be treated as 5 V tolerant. Its exact
+module revision and regulator are unverified, so both supply and I/O remain
+unassigned. Before a connected test, provide a stable verified 3.3 V rail and
+local bulk plus ceramic decoupling suitable for PA current transients.
