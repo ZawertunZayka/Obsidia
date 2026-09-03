@@ -11,6 +11,11 @@ module obsidia_spi_regs (
     input  wire buffer_full_pending,
     input  wire event_pending,
     input  wire external_error_pending,
+    input  wire fifo_empty,
+    input  wire [7:0] fifo_data,
+    input  wire [4:0] fifo_level,
+    output wire fifo_pop,
+    output reg  fifo_clear_toggle,
     output wire irq,
     output reg  event_ack_toggle
 );
@@ -24,20 +29,18 @@ module obsidia_spi_regs (
     reg       data_phase;
     reg       read_mode;
     reg       error_latched;
-    wire [7:0] current_register_data;
+    reg  [7:0] current_register_data;
     wire       transaction_reset;
 
-    function [7:0] read_register;
-        input [6:0] register_address;
-        begin
-            case (register_address)
-                7'h00: read_register = 8'h4f; // O
-                7'h01: read_register = 8'h42; // B
-                7'h02: read_register = 8'h53; // S
-                7'h03: read_register = 8'h44; // D
-                7'h04: read_register = VERSION_MAJOR;
-                7'h05: read_register = VERSION_MINOR;
-                7'h06: read_register = {
+    always @* begin
+        case (address)
+                7'h00: current_register_data = 8'h4f; // O
+                7'h01: current_register_data = 8'h42; // B
+                7'h02: current_register_data = 8'h53; // S
+                7'h03: current_register_data = 8'h44; // D
+                7'h04: current_register_data = VERSION_MAJOR;
+                7'h05: current_register_data = VERSION_MINOR;
+                7'h06: current_register_data = {
                     3'b000,
                     (error_latched | external_error_pending),
                     event_pending,
@@ -45,21 +48,23 @@ module obsidia_spi_regs (
                     data_ready_pending,
                     1'b1
                 };
-                7'h07: read_register = 8'h00;
-                default: read_register = 8'h00;
-            endcase
-        end
-    endfunction
-
-    assign current_register_data = read_register(address);
+                7'h07: current_register_data = 8'h00;
+                7'h08: current_register_data = fifo_empty ? 8'h00 : fifo_data;
+                7'h09: current_register_data = {3'b000, fifo_level};
+                7'h0a: current_register_data = 8'd16;
+                default: current_register_data = 8'h00;
+        endcase
+    end
     assign transaction_reset = spi_cs_n | ~reset_n;
     assign irq = data_ready_pending | buffer_full_pending | event_pending |
                  external_error_pending | error_latched;
+    assign fifo_pop = data_phase && read_mode && (address == 7'h08) &&
+                      (bit_count == 3'd7) && !fifo_empty && !spi_cs_n;
 
     function valid_address;
         input [6:0] register_address;
         begin
-            valid_address = (register_address <= 7'h07);
+            valid_address = (register_address <= 7'h0a);
         end
     endfunction
 
@@ -86,7 +91,10 @@ module obsidia_spi_regs (
                 end
             end else begin
                 if (bit_count == 3'd7) begin
-                    address   <= address + 1'b1;
+                    if (read_mode && address == 7'h08)
+                        address <= address;
+                    else
+                        address <= address + 1'b1;
                     bit_count <= 3'd0;
                 end else begin
                     bit_count <= bit_count + 1'b1;
@@ -100,6 +108,7 @@ module obsidia_spi_regs (
         if (!reset_n) begin
             error_latched <= 1'b0;
             event_ack_toggle <= 1'b0;
+            fifo_clear_toggle <= 1'b0;
         end else if (!spi_cs_n) begin
             if (!data_phase && bit_count == 3'd7 && rx_shift[6] &&
                 !valid_address({rx_shift[5:0], spi_mosi}))
@@ -117,6 +126,8 @@ module obsidia_spi_regs (
                             error_latched <= 1'b0;
                             event_ack_toggle <= ~event_ack_toggle;
                         end
+                        if (rx_shift[0])
+                            fifo_clear_toggle <= ~fifo_clear_toggle;
                         if (({rx_shift, spi_mosi} & 8'h7c) != 8'h00)
                             error_latched <= 1'b1;
                     end

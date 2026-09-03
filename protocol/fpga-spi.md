@@ -18,6 +18,9 @@ is visibly transferred as `O`, `B`, `S`, `D`.
 | `0x04` | VERSION | 2 | R | major, minor |
 | `0x06` | STATUS | 1 | R | health/event flags |
 | `0x07` | CONTROL | 1 | R/W | control requests |
+| `0x08` | FIFO_DATA | 1 | R | oldest byte; completed read pops it |
+| `0x09` | FIFO_LEVEL | 1 | R | synchronized readable byte count, 0..16 |
+| `0x0A` | FIFO_CAPACITY | 1 | R | `16` |
 
 The four-byte DEVICE_ID occupies addresses `0x00..0x03`; this resolves the
 ambiguity of treating `0x01` simultaneously as VERSION. Registers auto-increment
@@ -27,8 +30,8 @@ within a CS-low burst and invalid addresses read as zero while setting ERROR.
 
 STATUS bits: bit 0 `READY`, bit 1 `DATA_READY`, bit 2 `BUFFER_FULL`, bit 3
 `EVENT`, bit 4 `ERROR`; remaining bits are zero. IRQ is asserted when any enabled
-event bit is set and deasserted after the event is acknowledged. IRQ/FIFO details
-will extend this ABI without moving initial registers.
+event bit is set and deasserted after the event is acknowledged or FIFO data is
+drained.
 
 IRQ sources are level-sensitive. The owning producer holds its pending level
 until it observes a change on the `event_ack_toggle` signal; this avoids relying
@@ -42,6 +45,13 @@ self-clearing requests and always read as zero. Bit 0 clears the local protocol
 error and changes `event_ack_toggle`; each external event producer synchronizes
 that toggle before clearing its own pending level. Soft reset clears the local
 protocol error.
+
+`FIFO_DATA` is the sole auto-increment exception: while CS stays low, successive
+data bytes continue reading address `0x08` and pop consecutive FIFO entries.
+Reading an empty FIFO returns zero without underflowing. The FIFO is 16 bytes,
+rejects writes while full and crosses from the FPGA system clock into the SPI
+clock through Gray-coded pointers and two-stage synchronizers. CONTROL bit 1
+changes a clear toggle synchronized independently into both FIFO clock domains.
 
 After reset, the master validates DEVICE_ID and VERSION before trusting state.
 Identity mismatch, timeout or repeated invalid reads marks the FPGA unavailable

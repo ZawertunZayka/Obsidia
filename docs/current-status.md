@@ -16,8 +16,8 @@ Updated: 2026-09-03
   requirements.
 - Shared ObsidiaLink v1 codec/parser and radio-coprocessor core implemented;
   physical UART GPIO intentionally remains unset.
-- FPGA SPI mode 0 slave, base `OBSD` register map and IRQ aggregation implemented
-  without pin constraints; FIFO remains a separate stage.
+- FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
+  dual-clock FIFO implemented without pin constraints.
 
 ## Verification ledger
 
@@ -31,6 +31,7 @@ Updated: 2026-09-03
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |
 | FPGA IRQ RTL | pass | simulation | Pending/status/IRQ consistency and acknowledgement toggle tested |
+| FPGA FIFO RTL | pass | simulation | CDC, ordered burst reads, clear, full/empty and overflow rejection tested |
 | FPGA synthesis/bitstream | blocked on board revision | none | Device/package and pin constraints intentionally unset |
 | Main board identity | blocked on physical visibility | none | No USB device exposed to current sandbox |
 | GPIO map | intentionally unset | none | Exact board/revision unknown |

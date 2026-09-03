@@ -27,6 +27,11 @@ module obsidia_spi_regs_tb;
         .buffer_full_pending(buffer_full_pending),
         .event_pending(event_pending),
         .external_error_pending(external_error_pending),
+        .fifo_empty(1'b1),
+        .fifo_data(8'h00),
+        .fifo_level(5'h00),
+        .fifo_pop(),
+        .fifo_clear_toggle(),
         .irq(irq),
         .event_ack_toggle(event_ack_toggle)
     );
