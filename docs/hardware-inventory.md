@@ -2,7 +2,7 @@
 
 | Role | Reported hardware | Revision / identity | Voltage status | Verification |
 |---|---|---|---|---|
-| Main MCU | ESP32-S3, QFN56 rev v0.2, 8 MB PSRAM | Physical board unknown | Unknown | User report only |
+| Main MCU | ESP32-S3-WROOM N16R8, 16 MB flash, 8 MB octal PSRAM | 44-pin dual-USB DevKitC-1-compatible carrier; exact vendor/revision unknown | 3.3 V I/O; carrier power paths unverified | Module marking supplied by user; carrier front photo |
 | Radio MCU | ESP32 DevKit V1, 38 pin | Exact module/revision unknown | 3.3 V logic expected; unverified | User report only |
 | FPGA | Tang Nano 20K, GW2AR-18 | Exact board revision unknown | Unverified | User report only |
 | Display | ST7735, 1.8 in, 128x160 SPI | Tab/controller variant unknown | Unverified | User report only |

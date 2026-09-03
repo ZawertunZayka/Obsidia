@@ -27,9 +27,9 @@ The no-GPIO probe lives at `firmware/main-s3/diagnostics/board-identity`.
 Connect only the main board by USB first. Inspect it with `lsusb`, PlatformIO
 device enumeration and `esptool` before flashing. `identity-safe` does not
 initialize PSRAM; its zero PSRAM value is therefore not evidence that PSRAM is
-absent. Flash `identity-n8r8` only after the package/module marking or probe data
-confirms 8 MB octal PSRAM compatibility. Runtime output and clear photos of both
-board sides are required before assigning any GPIO.
+absent. The reported `N16R8` marking selects `identity-n16r8` for the runtime
+probe. Runtime output and clear photos of both board sides are required before
+assigning any GPIO.
 
 ## microSD notes
 
