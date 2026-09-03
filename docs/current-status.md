@@ -22,6 +22,8 @@ Updated: 2026-09-03
   rediscovers the FPGA and exposes bounded FIFO/control operations.
 - `OBSIDIA DIAGNOSTICS` has a fixed 20-component model plus an `OBSIDIA_V1`-only
   Bruce menu; unknown hardware remains visibly UNTESTED/N/A rather than passing.
+- RDM6300 standalone diagnostic and fixed-frame EM4100 parser implemented;
+  hardware pass remains pending confirmed radio-board UART wiring and a real tag.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -40,6 +42,8 @@ Updated: 2026-09-03
 | Main FpgaService | pass | host/build | Recovery/FIFO/control tests pass and complete Bruce control build succeeds |
 | Diagnostics model | pass | host/build | Inventory/mapping/bounds tests pass; S3 object compiles |
 | Diagnostics UI | pending target | build guard | Menu is isolated behind `OBSIDIA_V1`; target awaits board identity |
+| RDM6300 parser/diagnostic | pass | host/build | Framing/checksum/resync/timeout tests and ESP32 build pass |
+| RDM6300 hardware | pending wiring | none | RX GPIO unset; no physical tag evidence |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |

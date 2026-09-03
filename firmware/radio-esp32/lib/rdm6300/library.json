@@ -1,0 +1,5 @@
+{
+  "name": "ObsidiaRdm6300",
+  "version": "0.1.0",
+  "build": { "flags": ["-std=gnu++17"] }
+}
