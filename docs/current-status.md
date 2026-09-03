@@ -16,6 +16,8 @@ Updated: 2026-09-03
   requirements.
 - Shared ObsidiaLink v1 codec/parser and radio-coprocessor core implemented;
   physical UART GPIO intentionally remains unset.
+- Main-S3 `RadioService` implements bounded non-blocking discovery, heartbeat,
+  timeout retries and automatic rediscovery without UI or GPIO coupling.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
   dual-clock FIFO implemented without pin constraints.
 
@@ -28,6 +30,7 @@ Updated: 2026-09-03
 | Bruce control build | pass | build | PlatformIO success; 3,701,374 B flash, 128,320 B RAM |
 | ObsidiaLink codec/parser | pass | host | CRC vector, framing, bounds, timeout and resynchronization tests pass |
 | Radio MCU firmware | pass | build | PlatformIO `obsidia-radio` success; 289,780 B flash, 22,244 B RAM |
+| Main RadioService | pass | host/build | State-machine tests pass and complete Bruce control build succeeds |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |
 | FPGA IRQ RTL | pass | simulation | Pending/status/IRQ consistency and acknowledgement toggle tested |

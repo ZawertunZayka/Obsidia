@@ -3,3 +3,4 @@ project(obsidia_host_tests LANGUAGES CXX)
 
 enable_testing()
 add_subdirectory(obsidialink)
+add_subdirectory(radio_service)
