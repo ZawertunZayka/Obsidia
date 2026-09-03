@@ -74,6 +74,12 @@ Do not fork the Bruce menu, display, settings, Wi-Fi, BLE or USB subsystems mere
 to rename them. Keep Obsidia transport and diagnostics isolated so upstream
 updates remain reviewable.
 
+The transport-independent `RadioService` and `FpgaService` live under
+`src/obsidia/services`. `ArduinoTransports` adapts Bruce/Arduino `Stream` and
+`SPIClass` without owning bus pin selection. The future `OBSIDIA_V1` board
+interface must supply confirmed serial/SPI instances, CS GPIO and SPI frequency;
+an unset CS or zero frequency is rejected instead of silently starting a bus.
+
 ## Controlled copy
 
 The buildable snapshot lives directly in `firmware/main-s3`. Its
