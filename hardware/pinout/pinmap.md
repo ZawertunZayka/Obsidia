@@ -6,6 +6,22 @@ upstream Bruce board profiles.**
 The generic Bruce `esp32-s3-devkitc-1` profile contains illustrative/default
 pins, but these are not Obsidia assignments and must not be copied blindly.
 
+The main module is now confirmed as ESP32-S3 N16R8. Its photographed 44-pin
+carrier follows the ESP32-S3-DevKitC-1 header order and the right-hand USB-C is
+a working QinHeng USB-UART bridge. These board-owned signals are reserved:
+
+| GPIO / signal | Board use | Status |
+|---|---|---|
+| GPIO43 / U0TXD | USB-UART console TX | Confirmed by successful ROM/flash access |
+| GPIO44 / U0RXD | USB-UART console RX | Confirmed by successful ROM/flash access |
+| GPIO19 / USB D- | Native USB connector | Fixed ESP32-S3 function; connector not yet tested |
+| GPIO20 / USB D+ | Native USB connector | Fixed ESP32-S3 function; connector not yet tested |
+| GPIO0 | BOOT strap/button | Visible on carrier; reserve from peripherals |
+| GPIO3, GPIO45, GPIO46 | Strapping pins | Reserve until boot-level requirements are reviewed |
+| GPIO48 | Onboard RGB candidate | Visible beside RGB circuit; electrical mapping untested |
+
+No external module is assigned to any GPIO yet.
+
 ## ESP32-S3 master
 
 | Function | Module pin | ESP32-S3 board pin/GPIO | Supply | Logic | Status |

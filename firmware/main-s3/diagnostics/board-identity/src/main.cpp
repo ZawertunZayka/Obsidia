@@ -18,33 +18,35 @@ const char *flashModeName(FlashMode_t mode) {
     }
 }
 
-void reportIdentity() {
+void reportIdentity(Print &output) {
     esp_chip_info_t chip{};
     esp_chip_info(&chip);
 
-    Serial.println("OBSIDIA ESP32-S3 BOARD IDENTITY");
-    Serial.printf("chip_model=%s\n", ESP.getChipModel());
-    Serial.printf("chip_revision=%u\n", ESP.getChipRevision());
-    Serial.printf("chip_cores=%u\n", ESP.getChipCores());
-    Serial.printf("chip_features=0x%08lX\n", static_cast<unsigned long>(chip.features));
-    Serial.printf("cpu_mhz=%u\n", ESP.getCpuFreqMHz());
-    Serial.printf("flash_bytes=%lu\n", static_cast<unsigned long>(ESP.getFlashChipSize()));
-    Serial.printf("flash_speed_hz=%lu\n", static_cast<unsigned long>(ESP.getFlashChipSpeed()));
-    Serial.printf("flash_mode=%s\n", flashModeName(ESP.getFlashChipMode()));
-    Serial.printf("psram_initialized=%s\n", psramFound() ? "yes" : "no");
-    Serial.printf("psram_bytes=%lu\n", static_cast<unsigned long>(ESP.getPsramSize()));
-    Serial.printf("psram_heap_bytes=%lu\n",
+    output.println("OBSIDIA ESP32-S3 BOARD IDENTITY");
+    output.printf("chip_model=%s\n", ESP.getChipModel());
+    output.printf("chip_revision=%u\n", ESP.getChipRevision());
+    output.printf("chip_cores=%u\n", ESP.getChipCores());
+    output.printf("chip_features=0x%08lX\n", static_cast<unsigned long>(chip.features));
+    output.printf("cpu_mhz=%u\n", ESP.getCpuFreqMHz());
+    output.printf("flash_bytes=%lu\n", static_cast<unsigned long>(ESP.getFlashChipSize()));
+    output.printf("flash_speed_hz=%lu\n", static_cast<unsigned long>(ESP.getFlashChipSpeed()));
+    output.printf("flash_mode=%s\n", flashModeName(ESP.getFlashChipMode()));
+    output.printf("psram_initialized=%s\n", psramFound() ? "yes" : "no");
+    output.printf("psram_bytes=%lu\n", static_cast<unsigned long>(ESP.getPsramSize()));
+    output.printf("psram_heap_bytes=%lu\n",
                   static_cast<unsigned long>(heap_caps_get_total_size(MALLOC_CAP_SPIRAM)));
-    Serial.println("identity_report_end");
+    output.println("identity_report_end");
 }
 
 } // namespace
 
 void setup() {
+    Serial0.begin(115200);
     Serial.begin(115200);
     const std::uint32_t started = millis();
     while (!Serial && static_cast<std::uint32_t>(millis() - started) < 3000U) delay(10);
-    reportIdentity();
+    reportIdentity(Serial0);
+    reportIdentity(Serial);
 }
 
 void loop() { delay(1000); }

@@ -55,15 +55,15 @@ Updated: 2026-09-03
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
 | NRF24 hardware | pending wiring/power | none | GPIO unset; PA/LNA supply and decoupling unverified |
-| S3 identity diagnostic | pass | build | Safe and confirmed-memory N16R8 variants compile; neither has been flashed |
+| S3 identity diagnostic | pass | connected | N16R8 image flashed; 16 MB QIO/80 MHz flash and initialized 8 MB PSRAM reported |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |
 | FPGA IRQ RTL | pass | simulation | Pending/status/IRQ consistency and acknowledgement toggle tested |
 | FPGA FIFO RTL | pass | simulation | CDC, ordered burst reads, clear, full/empty and overflow rejection tested |
 | FPGA synthesis/bitstream | blocked on board revision | none | Device/package and pin constraints intentionally unset |
-| Main module identity | partial | visual | User reports N16R8 marking; USB runtime confirmation pending |
-| Main carrier identity | blocked on physical visibility | visual/host | Front pin order matches DevKitC-1; exact clone/revision and USB roles unconfirmed; USB rescan found no device |
+| Main module identity | pass | connected | ESP32-S3 QFN56 rev v0.2, 40 MHz crystal, N16R8 memory confirmed by ROM/JEDEC/runtime probes |
+| Main carrier identity | partial | connected | DevKitC-1-compatible 44-pin layout; right USB-C confirmed QinHeng USB-UART, vendor/revision unmarked |
 | GPIO map | intentionally unset | none | Exact board/revision unknown |
 | ST7735 through final stress test | not started | none | Must follow board identification |
 
