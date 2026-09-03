@@ -18,6 +18,8 @@ Updated: 2026-09-03
   physical UART GPIO intentionally remains unset.
 - Main-S3 `RadioService` implements bounded non-blocking discovery, heartbeat,
   timeout retries and automatic rediscovery without UI or GPIO coupling.
+- Main-S3 `FpgaService` validates identity/version/readiness, detects resets,
+  rediscovers the FPGA and exposes bounded FIFO/control operations.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
   dual-clock FIFO implemented without pin constraints.
 
@@ -31,6 +33,7 @@ Updated: 2026-09-03
 | ObsidiaLink codec/parser | pass | host | CRC vector, framing, bounds, timeout and resynchronization tests pass |
 | Radio MCU firmware | pass | build | PlatformIO `obsidia-radio` success; 289,780 B flash, 22,244 B RAM |
 | Main RadioService | pass | host/build | State-machine tests pass and complete Bruce control build succeeds |
+| Main FpgaService | pass | host/build | Recovery/FIFO/control tests pass and complete Bruce control build succeeds |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |
 | FPGA IRQ RTL | pass | simulation | Pending/status/IRQ consistency and acknowledgement toggle tested |
