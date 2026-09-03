@@ -8,6 +8,10 @@ Updated: 2026-09-03
 - Workspace structure and engineering policy established.
 - Bruce 1.16.1 archive analyzed; generic ESP32-S3 PSRAM target selected as a
   structural, not electrical, base.
+- Buildable Bruce 1.16.1 source snapshot imported into `firmware/main-s3` with
+  provenance, license and explicit Obsidia extension paths.
+- Generic Bruce `esp32-s3-devkitc-1-psram` control build passes after making the
+  upstream net80211 patch step compatible with the pinned modern toolchain.
 - UART and FPGA SPI protocol drafts documented with bounded framing and recovery
   requirements.
 
@@ -17,6 +21,7 @@ Updated: 2026-09-03
 |---|---|---|---|
 | Repository | pass | host | Git worktree and remote inspected |
 | Bruce analysis | pass | host | Local source files inspected; archive is not Git |
+| Bruce control build | pass | build | PlatformIO success; 3,701,374 B flash, 128,320 B RAM |
 | Main board identity | blocked on physical visibility | none | No USB device exposed to current sandbox |
 | GPIO map | intentionally unset | none | Exact board/revision unknown |
 | ST7735 through final stress test | not started | none | Must follow board identification |

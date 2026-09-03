@@ -21,9 +21,8 @@ is under `src/core`, feature implementations under `src/modules`, bundled
 libraries under `lib`, and custom PlatformIO board JSON files under
 `boards/_boards_json`.
 
-The supplied tree has no top-level `include` directory despite conventional
-PlatformIO documentation; shared headers live alongside core/modules and in
-board directories.
+Shared headers live in the small top-level `include` directory, alongside
+core/modules and board-local headers.
 
 ## Best starting target
 
@@ -74,3 +73,17 @@ a board-specific menu item consuming service health snapshots.
 Do not fork the Bruce menu, display, settings, Wi-Fi, BLE or USB subsystems merely
 to rename them. Keep Obsidia transport and diagnostics isolated so upstream
 updates remain reviewable.
+
+## Controlled copy
+
+The buildable snapshot lives directly in `firmware/main-s3`. Its
+`OBSIDIA_UPSTREAM.md` records provenance and exclusions. Build-relevant upstream
+source is vendored so a local archive disappearing does not break the project;
+Obsidia additions are constrained to clearly named board/service paths and
+logical commits so future release updates remain reviewable.
+
+The imported `patch.py` required one compatibility fix: it now resolves
+`objcopy` from PlatformIO's installed modern toolchain package instead of
+invoking a removed legacy package name. It also fails before replacing
+`libnet80211.a` if patch generation fails. This is an Obsidia-maintained build
+fix, not a board-specific hardware change.

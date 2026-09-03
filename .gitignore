@@ -12,3 +12,6 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 firmware/main-s3/upstream/.pio/
+firmware/main-s3/include/current_year.h
+firmware/main-s3/include/webFiles.h
+firmware/main-s3/embedded_resources/web_interface/checksum.sha256
