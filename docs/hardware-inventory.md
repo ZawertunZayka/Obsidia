@@ -5,7 +5,7 @@
 | Main MCU | ESP32-S3-WROOM N16R8, QFN56 rev v0.2, 16 MB quad flash, 8 MB embedded PSRAM | 44-pin dual-USB DevKitC-1-compatible carrier with QinHeng USB-UART; exact carrier vendor/revision unmarked | 3.3 V I/O; flash/PSRAM both 3.3 V | Photo, ROM probe, JEDEC probe and runtime diagnostic |
 | Radio MCU | ESP32 DevKit V1, 38 pin | Exact module/revision unknown | 3.3 V logic expected; unverified | User report only |
 | FPGA | Tang Nano 20K, GW2AR-18 | Exact board revision unknown | Unverified | User report only |
-| Display | ST7735, 1.8 in, 128x160 SPI | Tab/controller variant unknown | Unverified | User report only |
+| Display | ST7735, 1.8 in, 128x160 write-only SPI | `1.8\" TFT 128*RGB*160 VER 1.0`, pins BL/CS/DC/RES/SDA/SCK/VCC/GND | Supply and logic constrained to 3.3 V | Front/back photos; controller profile still physically unverified |
 | Storage | SPI microSD module with LVC125A-like buffer | Exact schematic/revision unknown | Unverified | User report; prior CMD8 failures |
 | NFC | PN532, 13.56 MHz | Interface selector/revision unknown | Unverified | User report only |
 | LF RFID | RDM6300, 125 kHz EM4100 | Revision unknown | Unverified | User report only |

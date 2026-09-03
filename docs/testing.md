@@ -18,6 +18,8 @@ Only the last three levels establish hardware success. Each result in
 - FPGA SPI: register reads/writes, invalid address behavior, reset defaults,
   burst boundaries, IRQ flags and FIFO overflow/underflow.
 - ESP32-S3: standalone diagnostics for every local hardware service.
+- ST7735 standalone: full-screen red/green/blue/black/white sequence followed
+  by visible `OBSIDIA` / `DISPLAY OK`; confirm offsets, rotation and color order.
 - Radio ESP32: protocol loopback/PING and standalone peripheral probes.
 - CC1101 standalone: reset-ready timeout, PARTNUM/VERSION identity, reversible
   PKTLEN register write/read/restore and valid MARCSTATE without RF transmission.

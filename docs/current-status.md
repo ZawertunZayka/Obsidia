@@ -31,6 +31,8 @@ Updated: 2026-09-03
   reversible RF_CH write with CE held low; it performs no receive/transmit work.
 - ESP32-S3 board-identity firmware is prepared in safe/no-PSRAM and N16R8 probe
   variants; both compile and use no peripheral GPIO.
+- ST7735 VER 1.0 module identified from front/back photos; a 3.3 V-only
+  standalone TFT_eSPI color/geometry/text diagnostic builds for assigned GPIO.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -64,8 +66,10 @@ Updated: 2026-09-03
 | FPGA synthesis/bitstream | blocked on board revision | none | Device/package and pin constraints intentionally unset |
 | Main module identity | pass | connected | ESP32-S3 QFN56 rev v0.2, 40 MHz crystal, N16R8 memory confirmed by ROM/JEDEC/runtime probes |
 | Main carrier identity | partial | connected | DevKitC-1-compatible 44-pin layout; right USB-C confirmed QinHeng USB-UART, vendor/revision unmarked |
-| GPIO map | intentionally unset | none | Exact board/revision unknown |
-| ST7735 through final stress test | not started | none | Must follow board identification |
+| GPIO map | partial | visual/design | Board-owned pins reserved; ST7735 assignment recorded, all later modules remain unset |
+| ST7735 diagnostic | pass | build | BLACKTAB/BGR 128x160 candidate at 10 MHz builds for N16R8 |
+| ST7735 hardware | pending wiring | none | Color order, offsets, rotation and visible output unverified |
+| Controls through final stress test | not started | none | Follows standalone display pass |
 
 ## Gate
 

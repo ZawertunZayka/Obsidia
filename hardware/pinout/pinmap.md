@@ -20,13 +20,16 @@ a working QinHeng USB-UART bridge. These board-owned signals are reserved:
 | GPIO3, GPIO45, GPIO46 | Strapping pins | Reserve until boot-level requirements are reviewed |
 | GPIO48 | Onboard RGB candidate | Visible beside RGB circuit; electrical mapping untested |
 
-No external module is assigned to any GPIO yet.
+The first external assignment is the standalone ST7735 bring-up bus. SCLK and
+MOSI are reserved as a future shared local-peripheral SPI bus; GPIO13 is held
+for its MISO even though this display does not expose one.
 
 ## ESP32-S3 master
 
 | Function | Module pin | ESP32-S3 board pin/GPIO | Supply | Logic | Status |
 |---|---|---|---|---|---|
-| ST7735 SPI | SCLK/MOSI/CS/DC/RST/BL | TBD | TBD | TBD | Unconfirmed |
+| ST7735 SPI | SCK/SDA/CS/DC/RES/BL | GPIO12/GPIO11/GPIO10/GPIO9/GPIO14/GPIO21 | 3.3 V | 3.3 V | Assigned; physical test pending |
+| Shared local SPI | MISO | GPIO13 | 3.3 V | 3.3 V | Reserved for later SD/PN532 use |
 | microSD SPI | SCLK/MOSI/MISO/CS | TBD | TBD | TBD | Unconfirmed |
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
 | IR | TX/RX | TBD | TBD | TBD | Unconfirmed |

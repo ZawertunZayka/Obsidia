@@ -13,8 +13,13 @@
 // #define ST7735_GREENTAB2
 //#define ST7735_GREENTAB3
 // #define ST7735_GREENTAB128    // For 128 x 128 display
-#define ST7735_GREENTAB160x80  // For 160 x 80 display (BGR, inverted, 26
-                               // offset)
+#if !defined(ST7735_INITB) && !defined(ST7735_GREENTAB) && \
+    !defined(ST7735_GREENTAB2) && !defined(ST7735_GREENTAB3) && \
+    !defined(ST7735_GREENTAB128) && !defined(ST7735_GREENTAB160x80) && \
+    !defined(ST7735_REDTAB) && !defined(ST7735_BLACKTAB) && \
+    !defined(ST7735_REDTAB160x80)
+#define ST7735_GREENTAB160x80  // Vendored Bruce default when no target selects a tab.
+#endif
                                //#define ST7735_REDTAB
 //#define ST7735_BLACKTAB
 //#define ST7735_REDTAB160x80
