@@ -1,6 +1,7 @@
 # ObsidiaLink UART protocol
 
-Status: protocol version 1 draft; implementation tests required before hardware use.
+Status: protocol version 1; codec/parser host tests pass, hardware transport is
+pending confirmed UART GPIO and physical loop testing.
 
 ## Frame
 
@@ -58,3 +59,8 @@ frames are reported and discarded. A SOF encountered after a framing error may
 start a new frame. An incomplete frame is abandoned after 100 ms from its most
 recent byte. The master retries idempotent discovery requests after timeout and
 re-runs version/status discovery when the peer restarts or stops responding.
+
+`GET_STATUS` version 1 returns `[request-command, protocol-version, ready-bits,
+supported-bits]`. Bits 0..2 represent RDM6300, CC1101 and NRF24 respectively.
+A supported bit describes compiled capability; a ready bit is set only after the
+peripheral's standalone diagnostic has passed during the current boot.

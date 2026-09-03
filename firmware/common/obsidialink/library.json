@@ -1,0 +1,6 @@
+{
+  "name": "ObsidiaLink",
+  "version": "1.0.0",
+  "description": "Bounded UART framing shared by Obsidia ESP32 firmware",
+  "build": { "srcDir": "src", "includeDir": "include" }
+}
