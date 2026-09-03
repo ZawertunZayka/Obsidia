@@ -30,11 +30,18 @@ STATUS bits: bit 0 `READY`, bit 1 `DATA_READY`, bit 2 `BUFFER_FULL`, bit 3
 event bit is set and deasserted after the event is acknowledged. IRQ/FIFO details
 will extend this ABI without moving initial registers.
 
+IRQ sources are level-sensitive. The owning producer holds its pending level
+until it observes a change on the `event_ack_toggle` signal; this avoids relying
+on a narrow pulse across clock domains. Protocol/register errors are latched in
+the SPI domain and cleared directly by acknowledgement. IRQ is the OR of status
+bits 1..4 and therefore cannot silently disagree with STATUS.
+
 CONTROL bit 0 requests event acknowledgement; bit 1 requests FIFO clear; bit 7
 requests soft reset. Reserved bits must be written as zero. Request bits are
-self-clearing once their operation exists; before IRQ/FIFO integration, bits
-0..1 provide readback for register-interface diagnostics. Soft reset clears the
-CONTROL readback and latched protocol error.
+self-clearing requests and always read as zero. Bit 0 clears the local protocol
+error and changes `event_ack_toggle`; each external event producer synchronizes
+that toggle before clearing its own pending level. Soft reset clears the local
+protocol error.
 
 After reset, the master validates DEVICE_ID and VERSION before trusting state.
 Identity mismatch, timeout or repeated invalid reads marks the FPGA unavailable

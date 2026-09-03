@@ -16,8 +16,8 @@ Updated: 2026-09-03
   requirements.
 - Shared ObsidiaLink v1 codec/parser and radio-coprocessor core implemented;
   physical UART GPIO intentionally remains unset.
-- FPGA SPI mode 0 slave and base `OBSD` register map implemented without pin
-  constraints; IRQ and FIFO extensions remain separate stages.
+- FPGA SPI mode 0 slave, base `OBSD` register map and IRQ aggregation implemented
+  without pin constraints; FIFO remains a separate stage.
 
 ## Verification ledger
 
@@ -30,6 +30,7 @@ Updated: 2026-09-03
 | Radio MCU firmware | pass | build | PlatformIO `obsidia-radio` success; 289,780 B flash, 22,244 B RAM |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |
+| FPGA IRQ RTL | pass | simulation | Pending/status/IRQ consistency and acknowledgement toggle tested |
 | FPGA synthesis/bitstream | blocked on board revision | none | Device/package and pin constraints intentionally unset |
 | Main board identity | blocked on physical visibility | none | No USB device exposed to current sandbox |
 | GPIO map | intentionally unset | none | Exact board/revision unknown |

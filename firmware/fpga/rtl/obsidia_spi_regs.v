@@ -6,7 +6,13 @@ module obsidia_spi_regs (
     input  wire spi_sclk,
     input  wire spi_cs_n,
     input  wire spi_mosi,
-    output reg  spi_miso
+    output reg  spi_miso,
+    input  wire data_ready_pending,
+    input  wire buffer_full_pending,
+    input  wire event_pending,
+    input  wire external_error_pending,
+    output wire irq,
+    output reg  event_ack_toggle
 );
     localparam [7:0] VERSION_MAJOR = 8'd1;
     localparam [7:0] VERSION_MINOR = 8'd0;
@@ -18,7 +24,6 @@ module obsidia_spi_regs (
     reg       data_phase;
     reg       read_mode;
     reg       error_latched;
-    reg [1:0] control_reg;
     wire [7:0] current_register_data;
     wire       transaction_reset;
 
@@ -32,8 +37,15 @@ module obsidia_spi_regs (
                 7'h03: read_register = 8'h44; // D
                 7'h04: read_register = VERSION_MAJOR;
                 7'h05: read_register = VERSION_MINOR;
-                7'h06: read_register = {3'b000, error_latched, 3'b000, 1'b1};
-                7'h07: read_register = {6'b000000, control_reg};
+                7'h06: read_register = {
+                    3'b000,
+                    (error_latched | external_error_pending),
+                    event_pending,
+                    buffer_full_pending,
+                    data_ready_pending,
+                    1'b1
+                };
+                7'h07: read_register = 8'h00;
                 default: read_register = 8'h00;
             endcase
         end
@@ -41,6 +53,8 @@ module obsidia_spi_regs (
 
     assign current_register_data = read_register(address);
     assign transaction_reset = spi_cs_n | ~reset_n;
+    assign irq = data_ready_pending | buffer_full_pending | event_pending |
+                 external_error_pending | error_latched;
 
     function valid_address;
         input [6:0] register_address;
@@ -85,7 +99,7 @@ module obsidia_spi_regs (
     always @(posedge spi_sclk or negedge reset_n) begin
         if (!reset_n) begin
             error_latched <= 1'b0;
-            control_reg   <= 2'b00;
+            event_ack_toggle <= 1'b0;
         end else if (!spi_cs_n) begin
             if (!data_phase && bit_count == 3'd7 && rx_shift[6] &&
                 !valid_address({rx_shift[5:0], spi_mosi}))
@@ -98,9 +112,11 @@ module obsidia_spi_regs (
                 if (address == 7'h07) begin
                     if (rx_shift[6]) begin
                         error_latched <= 1'b0;
-                        control_reg   <= 2'b00;
                     end else begin
-                        control_reg <= {rx_shift[0], spi_mosi};
+                        if (spi_mosi) begin
+                            error_latched <= 1'b0;
+                            event_ack_toggle <= ~event_ack_toggle;
+                        end
                         if (({rx_shift, spi_mosi} & 8'h7c) != 8'h00)
                             error_latched <= 1'b1;
                     end

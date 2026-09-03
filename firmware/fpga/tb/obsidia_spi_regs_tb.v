@@ -7,6 +7,12 @@ module obsidia_spi_regs_tb;
     reg spi_cs_n = 1'b1;
     reg spi_mosi = 1'b0;
     wire spi_miso;
+    reg data_ready_pending = 1'b0;
+    reg buffer_full_pending = 1'b0;
+    reg event_pending = 1'b0;
+    reg external_error_pending = 1'b0;
+    wire irq;
+    wire event_ack_toggle;
 
     reg [7:0] received;
     integer failures = 0;
@@ -16,7 +22,13 @@ module obsidia_spi_regs_tb;
         .spi_sclk(spi_sclk),
         .spi_cs_n(spi_cs_n),
         .spi_mosi(spi_mosi),
-        .spi_miso(spi_miso)
+        .spi_miso(spi_miso),
+        .data_ready_pending(data_ready_pending),
+        .buffer_full_pending(buffer_full_pending),
+        .event_pending(event_pending),
+        .external_error_pending(external_error_pending),
+        .irq(irq),
+        .event_ack_toggle(event_ack_toggle)
     );
 
     task spi_byte;
@@ -81,14 +93,22 @@ module obsidia_spi_regs_tb;
         spi_byte(8'h00, received); expect_byte(received, 8'h01, "ready status");
         end_transaction();
 
+        data_ready_pending = 1'b1;
+        #5;
+        if (irq !== 1'b1) begin
+            $display("FAIL IRQ did not assert for DATA_READY");
+            failures = failures + 1;
+        end
         begin_transaction();
-        spi_byte(8'h07, received);
-        spi_byte(8'h02, received);
+        spi_byte(8'h86, received);
+        spi_byte(8'h00, received); expect_byte(received, 8'h03, "data ready status");
         end_transaction();
-        begin_transaction();
-        spi_byte(8'h87, received);
-        spi_byte(8'h00, received); expect_byte(received, 8'h02, "control readback");
-        end_transaction();
+        data_ready_pending = 1'b0;
+        #5;
+        if (irq !== 1'b0) begin
+            $display("FAIL IRQ did not clear with pending source");
+            failures = failures + 1;
+        end
 
         begin_transaction();
         spi_byte(8'hff, received);
@@ -98,15 +118,27 @@ module obsidia_spi_regs_tb;
         spi_byte(8'h86, received);
         spi_byte(8'h00, received); expect_byte(received, 8'h11, "latched error");
         end_transaction();
+        if (irq !== 1'b1) begin
+            $display("FAIL IRQ did not assert for protocol error");
+            failures = failures + 1;
+        end
 
         begin_transaction();
         spi_byte(8'h07, received);
-        spi_byte(8'h80, received);
+        spi_byte(8'h01, received);
         end_transaction();
+        if (event_ack_toggle !== 1'b1) begin
+            $display("FAIL event ACK toggle did not change");
+            failures = failures + 1;
+        end
         begin_transaction();
         spi_byte(8'h86, received);
-        spi_byte(8'h00, received); expect_byte(received, 8'h01, "soft reset status");
+        spi_byte(8'h00, received); expect_byte(received, 8'h01, "acknowledged status");
         end_transaction();
+        if (irq !== 1'b0) begin
+            $display("FAIL IRQ did not clear after protocol error ACK");
+            failures = failures + 1;
+        end
 
         if (failures == 0) begin
             $display("PASS obsidia_spi_regs_tb");
