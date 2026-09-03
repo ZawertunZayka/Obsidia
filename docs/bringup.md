@@ -21,6 +21,16 @@ stress, IR, PN532, ObsidiaLink PING, RDM6300, CC1101 register access, NRF24
 presence, FPGA registers, FPGA IRQ and FPGA FIFO. Integration follows in the
 same order.
 
+## ESP32-S3 identity gate
+
+The no-GPIO probe lives at `firmware/main-s3/diagnostics/board-identity`.
+Connect only the main board by USB first. Inspect it with `lsusb`, PlatformIO
+device enumeration and `esptool` before flashing. `identity-safe` does not
+initialize PSRAM; its zero PSRAM value is therefore not evidence that PSRAM is
+absent. Flash `identity-n8r8` only after the package/module marking or probe data
+confirms 8 MB octal PSRAM compatibility. Runtime output and clear photos of both
+board sides are required before assigning any GPIO.
+
 ## microSD notes
 
 The module includes an LVC125A/SN74xx125-like buffer and has previously returned

@@ -29,6 +29,8 @@ Updated: 2026-09-03
   no RF operation is enabled and all GPIO remain unset.
 - NRF24L01+ standalone diagnostic validates STATUS/register reserved bits and a
   reversible RF_CH write with CE held low; it performs no receive/transmit work.
+- ESP32-S3 board-identity firmware is prepared in safe/no-PSRAM and N8R8 probe
+  variants; both compile and use no peripheral GPIO.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -53,13 +55,14 @@ Updated: 2026-09-03
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
 | NRF24 hardware | pending wiring/power | none | GPIO unset; PA/LNA supply and decoupling unverified |
+| S3 identity diagnostic | pass | build | Safe and N8R8 variants compile; neither has been flashed |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |
 | FPGA IRQ RTL | pass | simulation | Pending/status/IRQ consistency and acknowledgement toggle tested |
 | FPGA FIFO RTL | pass | simulation | CDC, ordered burst reads, clear, full/empty and overflow rejection tested |
 | FPGA synthesis/bitstream | blocked on board revision | none | Device/package and pin constraints intentionally unset |
-| Main board identity | blocked on physical visibility | none | No USB device exposed to current sandbox |
+| Main board identity | blocked on physical visibility | host | 2026-09-03 USB rescan found no ESP32/USB-UART device |
 | GPIO map | intentionally unset | none | Exact board/revision unknown |
 | ST7735 through final stress test | not started | none | Must follow board identification |
 
