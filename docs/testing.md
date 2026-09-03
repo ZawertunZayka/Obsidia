@@ -19,5 +19,7 @@ Only the last three levels establish hardware success. Each result in
   burst boundaries, IRQ flags and FIFO overflow/underflow.
 - ESP32-S3: standalone diagnostics for every local hardware service.
 - Radio ESP32: protocol loopback/PING and standalone peripheral probes.
+- CC1101 standalone: reset-ready timeout, PARTNUM/VERSION identity, reversible
+  PKTLEN register write/read/restore and valid MARCSTATE without RF transmission.
 - Final: cold boot, repeated reset, USB reconnect, long runtime, concurrent
   initialization and independent coprocessor resets.

@@ -24,6 +24,9 @@ Updated: 2026-09-03
   Bruce menu; unknown hardware remains visibly UNTESTED/N/A rather than passing.
 - RDM6300 standalone diagnostic and fixed-frame EM4100 parser implemented;
   hardware pass remains pending confirmed radio-board UART wiring and a real tag.
+- CC1101 standalone diagnostic implements bounded raw-SPI reset/ready timing,
+  identity reads, reversible register verification and MARCSTATE validation;
+  no RF operation is enabled and all GPIO remain unset.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -44,6 +47,8 @@ Updated: 2026-09-03
 | Diagnostics UI | pending target | build guard | Menu is isolated behind `OBSIDIA_V1`; target awaits board identity |
 | RDM6300 parser/diagnostic | pass | host/build | Framing/checksum/resync/timeout tests and ESP32 build pass |
 | RDM6300 hardware | pending wiring | none | RX GPIO unset; no physical tag evidence |
+| CC1101 diagnostic | pass | host/build | Failure paths and register restoration tested; ESP32 build succeeds |
+| CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |
