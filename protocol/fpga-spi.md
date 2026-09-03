@@ -1,7 +1,8 @@
 # ESP32-S3 to FPGA SPI protocol
 
-Status: register ABI draft. Electrical pins and final SPI mode/frequency remain
-unconfirmed until the exact Tang Nano 20K revision and wiring are known.
+Status: version 1 base register ABI implemented and behaviorally tested in SPI
+mode 0. Electrical pins and final frequency remain unconfirmed until the exact
+Tang Nano 20K revision and wiring are known.
 
 The ESP32-S3 is master and the FPGA is slave. Each transaction begins with one
 command byte: bit 7 is `1` for read and `0` for write; bits 6..0 are the register
@@ -30,7 +31,10 @@ event bit is set and deasserted after the event is acknowledged. IRQ/FIFO detail
 will extend this ABI without moving initial registers.
 
 CONTROL bit 0 requests event acknowledgement; bit 1 requests FIFO clear; bit 7
-requests soft reset. Reserved bits must be written as zero.
+requests soft reset. Reserved bits must be written as zero. Request bits are
+self-clearing once their operation exists; before IRQ/FIFO integration, bits
+0..1 provide readback for register-interface diagnostics. Soft reset clears the
+CONTROL readback and latched protocol error.
 
 After reset, the master validates DEVICE_ID and VERSION before trusting state.
 Identity mismatch, timeout or repeated invalid reads marks the FPGA unavailable
