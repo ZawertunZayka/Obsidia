@@ -15,8 +15,8 @@
 | Controls | 4x2 buttons/keypad | Matrix/common topology unknown | Unverified | User report only |
 
 The carrier's right-hand USB-C connector (viewed with antenna at the top) is a
-QinHeng `1A86:55D3` USB-UART bridge and enumerates as `/dev/ttyACM0`. The other
-USB-C connector has not yet been electrically exercised. A full pre-Obsidia
+QinHeng `1A86:55D3` USB-UART bridge. The native connector enumerates as Espressif
+`303A:1001` USB Serial/JTAG and was used to flash the display diagnostic. A full pre-Obsidia
 16 MB flash backup is retained locally under `.device-backups/`; binary images
 are excluded from Git. Its SHA-256 is
 `ad355bae8e4dcb07fc12b1286ee2de1b5a7c09eed50fac493dfaf92b67960c74`.

@@ -80,6 +80,11 @@ The transport-independent `RadioService` and `FpgaService` live under
 interface must supply confirmed serial/SPI instances, CS GPIO and SPI frequency;
 an unset CS or zero frequency is rejected instead of silently starting a bus.
 
+The hardware-independent `src/obsidia/input/InputService` owns only debounce,
+logical event generation and its fixed queue. A future Obsidia board
+`InputHandler` will scan the confirmed keypad topology and translate these
+events into Bruce's existing press flags; the UI will not read matrix GPIO.
+
 ## Controlled copy
 
 The buildable snapshot lives directly in `firmware/main-s3`. Its

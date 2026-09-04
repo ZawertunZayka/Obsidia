@@ -34,6 +34,9 @@ Updated: 2026-09-04
 - ST7735 VER 1.0 module identified from front/back photos. Its 3.3 V-only raw
   SPI standalone diagnostic was flashed and the user observed the final
   `OBSIDIA` / `DISPLAY OK` screen.
+- Hardware-independent `InputService` provides debounced press, release and
+  one-shot long-press events for eight keys with a fixed 16-event queue,
+  overflow accounting and wrap-safe timing.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -72,7 +75,9 @@ Updated: 2026-09-04
 | ST7735 upload | pass | connected | Diagnostic written and flash hashes verified over native USB |
 | ST7735 hardware | pass | user observation | Final black screen with `OBSIDIA` / `DISPLAY OK` is visible; write-only panel cannot provide readback |
 | ST7735 color calibration | partial | programmed sequence | RGB/black/white sequence ran; individual color naming was not separately reported |
-| Controls through final stress test | not started | none | Controls standalone diagnostic is the active stage |
+| InputService | pass | host | Debounce, release, long-press, simultaneous keys, bounded queue and timer rollover pass |
+| Controls hardware | pending identification | none | 4x2 matrix/common topology and markings require front/back photos before GPIO assignment |
+| SD through final stress test | not started | none | Follows connected controls standalone pass |
 
 ## Gate
 
