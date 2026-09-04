@@ -40,6 +40,10 @@ Updated: 2026-09-04
 - The photographed controls are an `8 Push Buttons V1.1` passive common-ground
   board. A dedicated N16R8 standalone diagnostic builds for its assigned GPIO
   and requires all eight debounced presses before reporting pass.
+- The buffered six-pin microSD adapter is identified and assigned to the shared
+  local SPI bus with GPIO8 chip-select. Its non-formatting standalone diagnostic
+  builds with explicit mount retries and 100 destructive-only-to-temp-file
+  create/write/read/verify/delete cycles.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -82,8 +86,10 @@ Updated: 2026-09-04
 | Controls diagnostic | pass | build | N16R8 standalone build uses InputService and explicit K1-K8 mapping |
 | Controls hardware | pass | connected/user action | K1-K8 debounced presses arrived in correct order; firmware emitted `[PASS] ALL 8 KEYS OBSERVED` |
 | Controls long press | partial | host | 600 ms one-shot behavior passes unit tests; physical long-press event was not observed in the capture window |
-| microSD hardware | pending identification | none | Exact module pins, supply path and buffer marking must be photographed before wiring |
-| SD through final stress test | not started | none | microSD standalone stress diagnostic is the active stage |
+| microSD diagnostic | pass | build | N16R8 build: 400 kHz mount retries, 4 MHz stress, 100 verified 2048-byte temporary files |
+| microSD hardware | pending wiring | visual | Buffered/regulator adapter identified; prior CMD8 failure remains unresolved until connected run |
+| SD stress | pending hardware | none | Requires inserted card and final `[PASS] SD_STRESS_100` marker |
+| IR through final stress test | not started | none | Follows connected microSD stress pass |
 
 ## Gate
 

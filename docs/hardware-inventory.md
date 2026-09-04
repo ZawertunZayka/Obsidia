@@ -6,7 +6,7 @@
 | Radio MCU | ESP32 DevKit V1, 38 pin | Exact module/revision unknown | 3.3 V logic expected; unverified | User report only |
 | FPGA | Tang Nano 20K, GW2AR-18 | Exact board revision unknown | Unverified | User report only |
 | Display | ST7735, 1.8 in, 128x160 write-only SPI | `1.8\" TFT 128*RGB*160 VER 1.0`, pins BL/CS/DC/RES/SDA/SCK/VCC/GND | Supply and logic constrained to 3.3 V | Front/back photos and visible `OBSIDIA` / `DISPLAY OK` standalone result |
-| Storage | SPI microSD module with LVC125A-like buffer | Exact schematic/revision unknown | Unverified | User report; prior CMD8 failures |
+| Storage | Six-pin `MicroSD Card Adapter` with 1117-class regulator and LVC125A-like 14-pin buffer | CS/SCK/MOSI/MISO/VCC/GND silk confirmed; exact IC markings too faint to read | 5VIN to onboard regulator; buffered bus remains 3.3 V | Front/back photos; connected test pending; prior CMD8 failures |
 | NFC | PN532, 13.56 MHz | Interface selector/revision unknown | Unverified | User report only |
 | LF RFID | RDM6300, 125 kHz EM4100 | Revision unknown | Unverified | User report only |
 | Sub-GHz | CC1101, 433 MHz | Module revision unknown | Unverified | User report only |

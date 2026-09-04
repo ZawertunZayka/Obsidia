@@ -38,3 +38,10 @@ The module includes an LVC125A/SN74xx125-like buffer and has previously returned
 logic direction and buffer enable wiring before changing software. The standalone
 test performs 100 create/write/read/verify/delete cycles and reports the exact
 failed cycle and operation.
+
+The photographed adapter includes a 1117-class regulator, so its header `VCC`
+is assigned to `5VIN`; feeding that input from 3.3 V would pass through the
+regulator dropout and can undervolt the card. The reported LVC125A-class buffer
+is operated from the regulated side: ESP32 bus pins remain strictly 3.3 V. See
+the manufacturer specifications for the [SN74LVC125A supply/input limits](https://www.ti.com/product/SN74LVC125A)
+and [AP1117 dropout behavior](https://www.diodes.com/part/view/AP1117).
