@@ -61,6 +61,7 @@ bool encode(
 
 bool isRequest(Command command);
 bool isResponse(Command command);
+ErrorCode errorCodeFor(ParseError error);
 
 class Parser {
 public:

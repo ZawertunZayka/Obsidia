@@ -52,6 +52,10 @@ bool isResponse(Command command) {
     return command == Command::Ack || command == Command::Error || command == Command::Data;
 }
 
+ErrorCode errorCodeFor(ParseError error) {
+    return error == ParseError::BadCrc ? ErrorCode::BadCrc : ErrorCode::MalformedFrame;
+}
+
 Parser::Parser(std::uint32_t interByteTimeoutMs) : timeoutMs_(interByteTimeoutMs) {}
 
 void Parser::reset() {

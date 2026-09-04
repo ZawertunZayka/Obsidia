@@ -55,10 +55,11 @@ acknowledged before a delayed restart.
 
 The receiver consumes bytes incrementally. Outside a frame it ignores bytes
 until SOF. Invalid length immediately returns to SOF search. CRC or malformed
-frames are reported and discarded. A SOF encountered after a framing error may
-start a new frame. An incomplete frame is abandoned after 100 ms from its most
-recent byte. The master retries idempotent discovery requests after timeout and
-re-runs version/status discovery when the peer restarts or stops responding.
+frames are discarded and the radio returns `ERROR` with request byte `0` and
+either `bad CRC` or `malformed frame`. A SOF encountered after a framing error
+may start a new frame. An incomplete frame is abandoned after 100 ms from its
+most recent byte. The master retries idempotent discovery requests after timeout
+and re-runs version/status discovery when the peer restarts or stops responding.
 
 `GET_STATUS` version 1 returns `[request-command, protocol-version, ready-bits,
 supported-bits]`. Bits 0..2 represent RDM6300, CC1101 and NRF24 respectively.

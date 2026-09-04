@@ -142,6 +142,9 @@ void testBoundsAndCommandClasses() {
     assert(isRequest(Command::Reset));
     assert(!isRequest(Command::Data));
     assert(isResponse(Command::Error));
+    assert(errorCodeFor(ParseError::BadCrc) == ErrorCode::BadCrc);
+    assert(errorCodeFor(ParseError::InvalidLength) == ErrorCode::MalformedFrame);
+    assert(errorCodeFor(ParseError::Timeout) == ErrorCode::MalformedFrame);
 }
 
 } // namespace

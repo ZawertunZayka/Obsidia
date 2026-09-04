@@ -122,11 +122,13 @@ void pollLink() {
             handleRequest(frame);
         } else if (event == ParseEvent::Error) {
             Serial.printf("[ERROR] ObsidiaLink parser error=%u\n", static_cast<unsigned>(parseError));
+            sendError(0, obsidia::link::errorCodeFor(parseError));
         }
     }
 
     if (parser.tick(millis(), parseError) == ParseEvent::Error) {
         Serial.printf("[ERROR] ObsidiaLink parser timeout=%u\n", static_cast<unsigned>(parseError));
+        sendError(0, obsidia::link::errorCodeFor(parseError));
     }
 }
 

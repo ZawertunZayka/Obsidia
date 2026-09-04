@@ -16,6 +16,8 @@ Updated: 2026-09-04
   requirements.
 - Shared ObsidiaLink v1 codec/parser and radio-coprocessor core implemented;
   physical UART GPIO intentionally remains unset.
+- Radio parser failures now produce bounded protocol `ERROR` responses: bad CRC
+  is distinguished from invalid length and incomplete-frame timeout.
 - Main-S3 `RadioService` implements bounded non-blocking discovery, heartbeat,
   timeout retries and automatic rediscovery without UI or GPIO coupling.
 - Main-S3 `FpgaService` validates identity/version/readiness, detects resets,
@@ -56,8 +58,8 @@ Updated: 2026-09-04
 | Repository | pass | host | Git worktree and remote inspected |
 | Bruce analysis | pass | host | Local source files inspected; archive is not Git |
 | Bruce control build | pass | build | PlatformIO success; 3,701,374 B flash, 128,320 B RAM |
-| ObsidiaLink codec/parser | pass | host | CRC vector, framing, bounds, timeout and resynchronization tests pass |
-| Radio MCU firmware | pass | build | PlatformIO `obsidia-radio` success; 289,780 B flash, 22,244 B RAM |
+| ObsidiaLink codec/parser | pass | host | CRC vector, framing, bounds, timeout, error mapping and resynchronization tests pass |
+| Radio MCU firmware | pass | build | PlatformIO `obsidia-radio` success; 289,780 B flash, 22,244 B RAM; malformed input returns protocol errors |
 | Main RadioService | pass | host/build | State-machine tests pass and complete Bruce control build succeeds |
 | Main FpgaService | pass | host/build | Recovery/FIFO/control tests pass and complete Bruce control build succeeds |
 | Diagnostics model | pass | host/build | Inventory/mapping/bounds tests pass; S3 object compiles |
