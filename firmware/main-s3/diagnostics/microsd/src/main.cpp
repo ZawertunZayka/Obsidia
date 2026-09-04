@@ -191,6 +191,8 @@ void setup() {
     pinMode(kPinSdCs, OUTPUT);
     digitalWrite(kPinSdCs, HIGH);
     SPI.begin(kPinSck, kPinMiso, kPinMosi, kPinSdCs);
+    pinMode(kPinMiso, INPUT_PULLUP);
+    delay(500);
     rawProbeResult = runRawProbe();
 
     if (!mountCard()) {

@@ -15,7 +15,8 @@ byte payload and reports the precise failed operation.
 Before the filesystem mount, a 100 kHz mode-0 raw probe records idle MISO and
 the bounded responses to SD commands CMD0 and CMD8. A mount failure therefore
 retains enough electrical/protocol evidence to distinguish a stuck bus from an
-invalid CMD8 echo without relying on early boot logs.
+invalid CMD8 echo without relying on early boot logs. GPIO13 uses its internal
+3.3 V pull-up so a tri-stated MISO is distinguishable from a driven low line.
 
 The ST7735 chip-select is held high because the display shares SCK/MOSI with the
 local SPI bus. A physical pass requires the final serial marker

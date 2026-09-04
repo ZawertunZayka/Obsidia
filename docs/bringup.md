@@ -51,3 +51,8 @@ three mount failures. This is not a filesystem or SPI-clock tuning result: MISO
 is held low before a valid SD idle response. Inspect VCC/GND/MISO continuity and
 card seating before any further software change; a valid CMD0 idle response is
 `01`.
+
+A second run enabled the GPIO13 internal 3.3 V pull-up and allowed 500 ms power
+settling; the retained result remained `idle=00 CMD0=00`. The line is therefore
+externally driven/clamped low rather than merely floating. The next isolation
+step is to sample the same pin with only the module MISO lead disconnected.
