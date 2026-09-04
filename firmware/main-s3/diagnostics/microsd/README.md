@@ -17,6 +17,10 @@ the bounded responses to SD commands CMD0 and CMD8. A mount failure therefore
 retains enough electrical/protocol evidence to distinguish a stuck bus from an
 invalid CMD8 echo without relying on early boot logs. GPIO13 uses its internal
 3.3 V pull-up so a tri-stated MISO is distinguishable from a driven low line.
+The pull-up is configured before `SPI.begin()`; reconfiguring the GPIO afterward
+would detach it from the Arduino-ESP32 3.x peripheral manager. The retained
+result records the GPIO level both before and after matrix attachment because
+an unconnected MISO loses the internal pull-up when SPI takes ownership.
 
 The ST7735 chip-select is held high because the display shares SCK/MOSI with the
 local SPI bus. A physical pass requires the final serial marker

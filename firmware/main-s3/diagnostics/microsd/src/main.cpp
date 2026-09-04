@@ -26,6 +26,8 @@ std::array<char, 160> resultBuffer{"[RESULT] NOT_RUN"};
 bool completed = false;
 
 struct RawProbeResult {
+    std::uint8_t gpioBeforeSpi = 0;
+    std::uint8_t gpioAfterSpi = 0;
     std::uint8_t idleMiso = 0;
     std::uint8_t cmd0 = 0xFF;
     std::uint8_t cmd8 = 0xFF;
@@ -85,8 +87,10 @@ std::uint8_t rawCommand(std::uint8_t command, std::uint32_t argument,
     return response;
 }
 
-RawProbeResult runRawProbe() {
+RawProbeResult runRawProbe(std::uint8_t gpioBeforeSpi) {
     RawProbeResult result;
+    result.gpioBeforeSpi = gpioBeforeSpi;
+    result.gpioAfterSpi = static_cast<std::uint8_t>(digitalRead(kPinMiso));
     SPI.beginTransaction(SPISettings(100000, MSBFIRST, SPI_MODE0));
     digitalWrite(kPinSdCs, HIGH);
     result.idleMiso = SPI.transfer(0xFF);
@@ -97,11 +101,13 @@ RawProbeResult runRawProbe() {
                                  result.cmd8Data.data(), result.cmd8Data.size());
     }
     SPI.endTransaction();
-    Serial0.printf("[RAW] idle=%02X CMD0=%02X CMD8=%02X data=%02X%02X%02X%02X\n",
+    Serial0.printf("[RAW] gpio_pre=%u gpio_post=%u idle=%02X CMD0=%02X CMD8=%02X data=%02X%02X%02X%02X\n",
+                   result.gpioBeforeSpi, result.gpioAfterSpi,
                    result.idleMiso, result.cmd0, result.cmd8,
                    result.cmd8Data[0], result.cmd8Data[1],
                    result.cmd8Data[2], result.cmd8Data[3]);
-    Serial.printf("[RAW] idle=%02X CMD0=%02X CMD8=%02X data=%02X%02X%02X%02X\n",
+    Serial.printf("[RAW] gpio_pre=%u gpio_post=%u idle=%02X CMD0=%02X CMD8=%02X data=%02X%02X%02X%02X\n",
+                  result.gpioBeforeSpi, result.gpioAfterSpi,
                   result.idleMiso, result.cmd0, result.cmd8,
                   result.cmd8Data[0], result.cmd8Data[1],
                   result.cmd8Data[2], result.cmd8Data[3]);
@@ -190,14 +196,17 @@ void setup() {
     digitalWrite(kPinDisplayCs, HIGH);
     pinMode(kPinSdCs, OUTPUT);
     digitalWrite(kPinSdCs, HIGH);
-    SPI.begin(kPinSck, kPinMiso, kPinMosi, kPinSdCs);
     pinMode(kPinMiso, INPUT_PULLUP);
+    delay(20);
+    const std::uint8_t gpioBeforeSpi = static_cast<std::uint8_t>(digitalRead(kPinMiso));
+    SPI.begin(kPinSck, kPinMiso, kPinMosi, kPinSdCs);
     delay(500);
-    rawProbeResult = runRawProbe();
+    rawProbeResult = runRawProbe(gpioBeforeSpi);
 
     if (!mountCard()) {
         snprintf(resultBuffer.data(), resultBuffer.size(),
-                 "[RESULT] FAIL SD_MOUNT idle=%02X CMD0=%02X CMD8=%02X echo=%02X%02X%02X%02X",
+                 "[RESULT] FAIL SD_MOUNT gpio=%u/%u idle=%02X CMD0=%02X CMD8=%02X echo=%02X%02X%02X%02X",
+                 rawProbeResult.gpioBeforeSpi, rawProbeResult.gpioAfterSpi,
                  rawProbeResult.idleMiso, rawProbeResult.cmd0, rawProbeResult.cmd8,
                  rawProbeResult.cmd8Data[0], rawProbeResult.cmd8Data[1],
                  rawProbeResult.cmd8Data[2], rawProbeResult.cmd8Data[3]);
