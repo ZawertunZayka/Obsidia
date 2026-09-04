@@ -46,6 +46,9 @@ Updated: 2026-09-04
   local SPI bus with GPIO8 chip-select. Its non-formatting standalone diagnostic
   builds with explicit mount retries and 100 destructive-only-to-temp-file
   create/write/read/verify/delete cycles.
+- Photographed IR hardware is a KY-005-style transmitter-only board. GPIO17 is
+  assigned for its protected `S` path and a bounded 38 kHz camera diagnostic is
+  prepared; an IR receiver has not yet been identified.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -91,7 +94,8 @@ Updated: 2026-09-04
 | microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
 | microSD hardware | fail under diagnosis | connected/isolation | Adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
 | SD stress | blocked by adapter/power | connected | Requires a 3.3 V regulator-output measurement or replacement adapter before rerun; no Bruce integration allowed |
-| IR through final stress test | not started | none | Follows connected microSD stress pass |
+| IR TX diagnostic | pass build / pending hardware | build/visual | N16R8 LEDC build passes; KY-005-style module has fitted 100 ohm resistor; camera observation required |
+| IR RX through final stress test | not started | none | Receiver hardware has not been identified |
 
 ## Gate
 

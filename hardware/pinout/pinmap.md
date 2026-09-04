@@ -33,7 +33,8 @@ for its MISO even though this display does not expose one.
 | Shared local SPI | MISO | GPIO13 | 3.3 V | 3.3 V | Reserved for later SD/PN532 use |
 | microSD SPI | SCK/MOSI/MISO/CS | GPIO12/GPIO11/GPIO13/GPIO8 | 5VIN into onboard 3.3 V regulator | 3.3 V buffered | Connected but failing: MISO stuck low; wiring/power inspection required |
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
-| IR | TX/RX | TBD | TBD | TBD | Unconfirmed |
+| IR TX (KY-005 type) | S / middle resistor-ground / `-` | GPIO17 / GND / NC | GPIO output through fitted 100 ohm resistor | 3.3 V GPIO | Assigned from photographed module; physical test pending |
+| IR RX | signal/power/ground | TBD | TBD | TBD | No receiver module identified |
 | buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | Confirmed: all eight debounced key presses observed |
 | Radio UART | TX/RX | TBD | 3.3 V domain | TBD | Unconfirmed |
 | FPGA SPI | SCLK/MOSI/MISO/CS/IRQ | TBD | 3.3 V domain expected | TBD | Unconfirmed |
