@@ -80,7 +80,11 @@ SPI3_HOST = 2
   #elif CONFIG_IDF_TARGET_ESP32S2
     #define SPI_PORT 2 //FSPI(ESP32 S2)
   #elif CONFIG_IDF_TARGET_ESP32S3
-    #define SPI_PORT FSPI
+    // Arduino-ESP32 3.x exposes FSPI as logical bus 0, while the ESP-IDF
+    // register macros require the hardware host index (SPI2_HOST == 2).
+    // Passing FSPI here resolves register addresses to zero and crashes on the
+    // first write with StoreProhibited at address 0x10.
+    #define SPI_PORT 2
   #endif
 #endif
 

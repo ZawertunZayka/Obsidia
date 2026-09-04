@@ -1,6 +1,6 @@
 # Current status
 
-Updated: 2026-09-03
+Updated: 2026-09-04
 
 ## Completed
 
@@ -31,8 +31,9 @@ Updated: 2026-09-03
   reversible RF_CH write with CE held low; it performs no receive/transmit work.
 - ESP32-S3 board-identity firmware is prepared in safe/no-PSRAM and N16R8 probe
   variants; both compile and use no peripheral GPIO.
-- ST7735 VER 1.0 module identified from front/back photos; a 3.3 V-only
-  standalone TFT_eSPI color/geometry/text diagnostic builds for assigned GPIO.
+- ST7735 VER 1.0 module identified from front/back photos. Its 3.3 V-only raw
+  SPI standalone diagnostic was flashed and the user observed the final
+  `OBSIDIA` / `DISPLAY OK` screen.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -67,12 +68,14 @@ Updated: 2026-09-03
 | Main module identity | pass | connected | ESP32-S3 QFN56 rev v0.2, 40 MHz crystal, N16R8 memory confirmed by ROM/JEDEC/runtime probes |
 | Main carrier identity | partial | connected | DevKitC-1-compatible 44-pin layout; right USB-C confirmed QinHeng USB-UART, vendor/revision unmarked |
 | GPIO map | partial | visual/design | Board-owned pins reserved; ST7735 assignment recorded, all later modules remain unset |
-| ST7735 diagnostic | pass | build | BLACKTAB/BGR 128x160 candidate at 10 MHz builds for N16R8 |
-| ST7735 hardware | pending wiring | none | Color order, offsets, rotation and visible output unverified |
-| Controls through final stress test | not started | none | Follows standalone display pass |
+| ST7735 diagnostic | pass | build/connected | Bounded raw-SPI 128x160 diagnostic builds and runs at 10 MHz on N16R8 |
+| ST7735 upload | pass | connected | Diagnostic written and flash hashes verified over native USB |
+| ST7735 hardware | pass | user observation | Final black screen with `OBSIDIA` / `DISPLAY OK` is visible; write-only panel cannot provide readback |
+| ST7735 color calibration | partial | programmed sequence | RGB/black/white sequence ran; individual color naming was not separately reported |
+| Controls through final stress test | not started | none | Controls standalone diagnostic is the active stage |
 
 ## Gate
 
-Software-only protocol, coprocessor and RTL work may proceed. No target GPIO,
-wiring, flashing or physical pass claim is permitted until the exact ESP32-S3
-board and pin exposure are established.
+The main board, memory configuration and first external SPI assignment are now
+established. New modules remain gated on an explicit pin-map assignment,
+standalone diagnostic and physical observation before Bruce integration.

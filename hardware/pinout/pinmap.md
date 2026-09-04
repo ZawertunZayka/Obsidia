@@ -14,8 +14,8 @@ a working QinHeng USB-UART bridge. These board-owned signals are reserved:
 |---|---|---|
 | GPIO43 / U0TXD | USB-UART console TX | Confirmed by successful ROM/flash access |
 | GPIO44 / U0RXD | USB-UART console RX | Confirmed by successful ROM/flash access |
-| GPIO19 / USB D- | Native USB connector | Fixed ESP32-S3 function; connector not yet tested |
-| GPIO20 / USB D+ | Native USB connector | Fixed ESP32-S3 function; connector not yet tested |
+| GPIO19 / USB D- | Native USB connector | Confirmed by native USB Serial/JTAG flashing |
+| GPIO20 / USB D+ | Native USB connector | Confirmed by native USB Serial/JTAG flashing |
 | GPIO0 | BOOT strap/button | Visible on carrier; reserve from peripherals |
 | GPIO3, GPIO45, GPIO46 | Strapping pins | Reserve until boot-level requirements are reviewed |
 | GPIO48 | Onboard RGB candidate | Visible beside RGB circuit; electrical mapping untested |
@@ -28,7 +28,7 @@ for its MISO even though this display does not expose one.
 
 | Function | Module pin | ESP32-S3 board pin/GPIO | Supply | Logic | Status |
 |---|---|---|---|---|---|
-| ST7735 SPI | SCK/SDA/CS/DC/RES/BL | GPIO12/GPIO11/GPIO10/GPIO9/GPIO14/GPIO21 | 3.3 V | 3.3 V | Assigned; physical test pending |
+| ST7735 SPI | SCK/SDA/CS/DC/RES/BL | GPIO12/GPIO11/GPIO10/GPIO9/GPIO14/GPIO21 | 3.3 V | 3.3 V | Confirmed: final diagnostic screen visible |
 | Shared local SPI | MISO | GPIO13 | 3.3 V | 3.3 V | Reserved for later SD/PN532 use |
 | microSD SPI | SCLK/MOSI/MISO/CS | TBD | TBD | TBD | Unconfirmed |
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
@@ -36,7 +36,7 @@ for its MISO even though this display does not expose one.
 | keypad 4x2 | six/eight interface pins | TBD | TBD | TBD | Topology unconfirmed |
 | Radio UART | TX/RX | TBD | 3.3 V domain | TBD | Unconfirmed |
 | FPGA SPI | SCLK/MOSI/MISO/CS/IRQ | TBD | 3.3 V domain expected | TBD | Unconfirmed |
-| native USB | D-/D+ connector routing | TBD | USB | USB | Board unknown |
+| native USB | GPIO19/GPIO20 connector routing | GPIO19/GPIO20 | USB | USB | Confirmed by flash transport |
 
 ## Radio ESP32
 
