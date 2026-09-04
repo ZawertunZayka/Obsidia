@@ -8,8 +8,8 @@ constexpr std::uint8_t kIrTxPin = 17;
 constexpr std::uint32_t kCarrierHz = 38000;
 constexpr std::uint8_t kResolutionBits = 8;
 constexpr std::uint8_t kDuty25Percent = 64;
-constexpr std::uint32_t kBurstMs = 150;
-constexpr std::uint32_t kPeriodMs = 1000;
+constexpr std::uint32_t kBurstMs = 1000;
+constexpr std::uint32_t kPeriodMs = 2000;
 
 bool carrierReady = false;
 std::uint32_t nextBurstAtMs = 0;
@@ -51,7 +51,7 @@ void setup() {
     Serial.begin(115200);
     delay(300);
     logLine("OBSIDIA KY-005 IR TX STANDALONE DIAGNOSTIC");
-    logLine("[INFO] GPIO17, 38kHz, 25% duty, 150ms burst every 1s");
+    logLine("[INFO] GPIO17, 38kHz, 25% duty, 1s on / 1s off");
     logLine("[INFO] Observe the IR LED through a phone camera; IR may look violet/white");
 
     pinMode(kIrTxPin, OUTPUT);

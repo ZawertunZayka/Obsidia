@@ -66,3 +66,15 @@ retrying the card, verify approximately 3.3 V on the regulator output. This
 adapter also cannot share MISO safely if its buffer output-enable is permanently
 active; use a corrected adapter, a dedicated bus, or a separately validated OE
 modification rather than hiding the conflict in software.
+
+## IR transmitter isolation
+
+The photographed IR board is a KY-005-style transmitter with a fitted `101`
+resistor. Its protected connection is `S -> GPIO17`, middle resistor-ground pin
+to GND, and direct `-` left open. The standalone diagnostic was built and
+flashed successfully; serial output confirms repeated 38 kHz PWM bursts. The
+initial 150 ms camera test was not visible, so the firmware was changed to one
+second on/one second off at 25% duty and reflashed. The user still saw no light,
+but the phone camera has not been validated against a known IR source. Hardware
+pass therefore remains inconclusive pending a wiring photo, calibrated IR
+camera/receiver, or electrical measurement.

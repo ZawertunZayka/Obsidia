@@ -94,7 +94,7 @@ Updated: 2026-09-04
 | microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
 | microSD hardware | fail under diagnosis | connected/isolation | Adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
 | SD stress | blocked by adapter/power | connected | Requires a 3.3 V regulator-output measurement or replacement adapter before rerun; no Bruce integration allowed |
-| IR TX diagnostic | pass build / pending hardware | build/visual | N16R8 LEDC build passes; KY-005-style module has fitted 100 ohm resistor; camera observation required |
+| IR TX diagnostic | pass build/upload / inconclusive hardware | build/connected | N16R8 image and 38 kHz burst logs pass; user saw no light with an uncalibrated phone camera and has no reference remote |
 | IR RX through final stress test | not started | none | Receiver hardware has not been identified |
 
 ## Gate
