@@ -80,8 +80,10 @@ Updated: 2026-09-04
 | ST7735 color calibration | partial | programmed sequence | RGB/black/white sequence ran; individual color naming was not separately reported |
 | InputService | pass | host | Debounce, release, long-press, simultaneous keys, bounded queue and timer rollover pass |
 | Controls diagnostic | pass | build | N16R8 standalone build uses InputService and explicit K1-K8 mapping |
-| Controls hardware | pending wiring | visual | `8 Push Buttons V1.1` common-ground topology identified; no connected key events yet |
-| SD through final stress test | not started | none | Follows connected controls standalone pass |
+| Controls hardware | pass | connected/user action | K1-K8 debounced presses arrived in correct order; firmware emitted `[PASS] ALL 8 KEYS OBSERVED` |
+| Controls long press | partial | host | 600 ms one-shot behavior passes unit tests; physical long-press event was not observed in the capture window |
+| microSD hardware | pending identification | none | Exact module pins, supply path and buffer marking must be photographed before wiring |
+| SD through final stress test | not started | none | microSD standalone stress diagnostic is the active stage |
 
 ## Gate
 
