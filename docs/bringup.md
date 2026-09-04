@@ -58,3 +58,11 @@ configuration removes that pull and the open input reads low. This proves the
 MCU pin works but invalidates the earlier inference that the connected adapter
 necessarily clamped it low. The corrected probe records both GPIO states and
 must now be repeated with MISO connected before selecting a hardware remedy.
+
+With MISO reconnected, the result was `gpio=0/0 idle=00 CMD0=00`; removing the
+card while keeping the adapter connected produced the same result. Thus GPIO13
+is healthy and the adapter itself holds its buffered MISO output low. Before
+retrying the card, verify approximately 3.3 V on the regulator output. This
+adapter also cannot share MISO safely if its buffer output-enable is permanently
+active; use a corrected adapter, a dedicated bus, or a separately validated OE
+modification rather than hiding the conflict in software.

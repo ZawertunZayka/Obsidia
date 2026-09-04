@@ -87,8 +87,8 @@ Updated: 2026-09-04
 | Controls hardware | pass | connected/user action | K1-K8 debounced presses arrived in correct order; firmware emitted `[PASS] ALL 8 KEYS OBSERVED` |
 | Controls long press | partial | host | 600 ms one-shot behavior passes unit tests; physical long-press event was not observed in the capture window |
 | microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
-| microSD hardware | fail under diagnosis | connected/isolation | Mount failed; disconnected-MISO control reads GPIO13 high before SPI and low after SPI matrix disables the internal pull-up |
-| SD stress | blocked by bus response | connected | Reconnect MISO and rerun corrected probe; stress requires CMD0 `01` and a successful mount |
+| microSD hardware | fail under diagnosis | connected/isolation | Adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
+| SD stress | blocked by adapter/power | connected | Requires a 3.3 V regulator-output measurement or replacement adapter before rerun; no Bruce integration allowed |
 | IR through final stress test | not started | none | Follows connected microSD stress pass |
 
 ## Gate
