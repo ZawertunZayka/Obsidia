@@ -45,3 +45,9 @@ regulator dropout and can undervolt the card. The reported LVC125A-class buffer
 is operated from the regulated side: ESP32 bus pins remain strictly 3.3 V. See
 the manufacturer specifications for the [SN74LVC125A supply/input limits](https://www.ti.com/product/SN74LVC125A)
 and [AP1117 dropout behavior](https://www.diodes.com/part/view/AP1117).
+
+Connected evidence on 2026-09-04 was `idle=00 CMD0=00 CMD8=FF`, followed by
+three mount failures. This is not a filesystem or SPI-clock tuning result: MISO
+is held low before a valid SD idle response. Inspect VCC/GND/MISO continuity and
+card seating before any further software change; a valid CMD0 idle response is
+`01`.

@@ -12,6 +12,13 @@ cycles using uniquely named `/.obsidia_sd_NNN.bin` temporary files. It does not
 format the card or touch other paths. Each cycle verifies a deterministic 2048
 byte payload and reports the precise failed operation.
 
+Before the filesystem mount, a 100 kHz mode-0 raw probe records idle MISO and
+the bounded responses to SD commands CMD0 and CMD8. A mount failure therefore
+retains enough electrical/protocol evidence to distinguish a stuck bus from an
+invalid CMD8 echo without relying on early boot logs.
+
 The ST7735 chip-select is held high because the display shares SCK/MOSI with the
 local SPI bus. A physical pass requires the final serial marker
-`[PASS] SD_STRESS_100 create/write/read/verify/delete`.
+`[RESULT] PASS SD_STRESS_100 create/write/read/verify/delete`. The result or a
+bounded failure description is retained in RAM and repeated every five seconds
+so native-USB re-enumeration cannot hide a fast startup result.

@@ -22,7 +22,17 @@ constexpr std::uint16_t kCycleCount = 100;
 
 std::array<std::uint8_t, kPayloadSize> writeBuffer{};
 std::array<std::uint8_t, kPayloadSize> readBuffer{};
+std::array<char, 160> resultBuffer{"[RESULT] NOT_RUN"};
 bool completed = false;
+
+struct RawProbeResult {
+    std::uint8_t idleMiso = 0;
+    std::uint8_t cmd0 = 0xFF;
+    std::uint8_t cmd8 = 0xFF;
+    std::array<std::uint8_t, 4> cmd8Data{0xFF, 0xFF, 0xFF, 0xFF};
+};
+
+RawProbeResult rawProbeResult;
 
 void logLine(const char *message) {
     Serial0.println(message);
@@ -30,8 +40,16 @@ void logLine(const char *message) {
 }
 
 void logFailure(std::uint16_t cycle, const char *operation, const char *detail) {
+    snprintf(resultBuffer.data(), resultBuffer.size(),
+             "[RESULT] FAIL cycle=%u operation=%s detail=%s", cycle, operation, detail);
     Serial0.printf("[FAIL] cycle=%u operation=%s detail=%s\n", cycle, operation, detail);
     Serial.printf("[FAIL] cycle=%u operation=%s detail=%s\n", cycle, operation, detail);
+}
+
+void failResult(const char *code) {
+    snprintf(resultBuffer.data(), resultBuffer.size(), "[RESULT] FAIL %s", code);
+    logLine(resultBuffer.data());
+    completed = true;
 }
 
 void fillPattern(std::uint16_t cycle) {
@@ -42,6 +60,52 @@ void fillPattern(std::uint16_t cycle) {
         state ^= state << 5U;
         writeBuffer[index] = static_cast<std::uint8_t>(state ^ index ^ cycle);
     }
+}
+
+std::uint8_t rawCommand(std::uint8_t command, std::uint32_t argument,
+                        std::uint8_t crc, std::uint8_t *extra,
+                        std::size_t extraLength) {
+    const std::uint8_t packet[] = {
+        static_cast<std::uint8_t>(0x40U | command),
+        static_cast<std::uint8_t>(argument >> 24U),
+        static_cast<std::uint8_t>(argument >> 16U),
+        static_cast<std::uint8_t>(argument >> 8U),
+        static_cast<std::uint8_t>(argument), crc};
+    digitalWrite(kPinSdCs, LOW);
+    for (const std::uint8_t value : packet) SPI.transfer(value);
+    std::uint8_t response = 0xFF;
+    for (std::uint8_t retry = 0; retry < 16U && response == 0xFFU; ++retry) {
+        response = SPI.transfer(0xFF);
+    }
+    for (std::size_t index = 0; index < extraLength; ++index) {
+        extra[index] = SPI.transfer(0xFF);
+    }
+    digitalWrite(kPinSdCs, HIGH);
+    SPI.transfer(0xFF);
+    return response;
+}
+
+RawProbeResult runRawProbe() {
+    RawProbeResult result;
+    SPI.beginTransaction(SPISettings(100000, MSBFIRST, SPI_MODE0));
+    digitalWrite(kPinSdCs, HIGH);
+    result.idleMiso = SPI.transfer(0xFF);
+    for (std::uint8_t index = 0; index < 16U; ++index) SPI.transfer(0xFF);
+    result.cmd0 = rawCommand(0, 0, 0x95, nullptr, 0);
+    if (result.cmd0 == 0x01U) {
+        result.cmd8 = rawCommand(8, 0x000001AAU, 0x87,
+                                 result.cmd8Data.data(), result.cmd8Data.size());
+    }
+    SPI.endTransaction();
+    Serial0.printf("[RAW] idle=%02X CMD0=%02X CMD8=%02X data=%02X%02X%02X%02X\n",
+                   result.idleMiso, result.cmd0, result.cmd8,
+                   result.cmd8Data[0], result.cmd8Data[1],
+                   result.cmd8Data[2], result.cmd8Data[3]);
+    Serial.printf("[RAW] idle=%02X CMD0=%02X CMD8=%02X data=%02X%02X%02X%02X\n",
+                  result.idleMiso, result.cmd0, result.cmd8,
+                  result.cmd8Data[0], result.cmd8Data[1],
+                  result.cmd8Data[2], result.cmd8Data[3]);
+    return result;
 }
 
 bool mountCard() {
@@ -120,24 +184,30 @@ void setup() {
     Serial.begin(115200);
     delay(300);
     logLine("OBSIDIA MICROSD STANDALONE STRESS DIAGNOSTIC");
+    snprintf(resultBuffer.data(), resultBuffer.size(), "[RESULT] RUNNING");
 
     pinMode(kPinDisplayCs, OUTPUT);
     digitalWrite(kPinDisplayCs, HIGH);
     pinMode(kPinSdCs, OUTPUT);
     digitalWrite(kPinSdCs, HIGH);
     SPI.begin(kPinSck, kPinMiso, kPinMosi, kPinSdCs);
+    rawProbeResult = runRawProbe();
 
     if (!mountCard()) {
-        logLine("[FAIL] SD_MOUNT_FAILED after 3 attempts; check VCC/regulator/card/buffer wiring");
+        snprintf(resultBuffer.data(), resultBuffer.size(),
+                 "[RESULT] FAIL SD_MOUNT idle=%02X CMD0=%02X CMD8=%02X echo=%02X%02X%02X%02X",
+                 rawProbeResult.idleMiso, rawProbeResult.cmd0, rawProbeResult.cmd8,
+                 rawProbeResult.cmd8Data[0], rawProbeResult.cmd8Data[1],
+                 rawProbeResult.cmd8Data[2], rawProbeResult.cmd8Data[3]);
+        logLine(resultBuffer.data());
         completed = true;
         return;
     }
 
     const std::uint8_t type = SD.cardType();
     if (type == CARD_NONE) {
-        logLine("[FAIL] SD_CARD_NONE");
+        failResult("SD_CARD_NONE");
         SD.end();
-        completed = true;
         return;
     }
     Serial0.printf("[CARD] type=%u size=%llu MiB\n", type, SD.cardSize() / (1024ULL * 1024ULL));
@@ -146,8 +216,7 @@ void setup() {
     SD.end();
     delay(50);
     if (!SD.begin(kPinSdCs, SPI, kStressFrequencyHz, "/sd", 5, false)) {
-        logLine("[FAIL] SD_REMOUNT_4MHZ_FAILED");
-        completed = true;
+        failResult("SD_REMOUNT_4MHZ_FAILED");
         return;
     }
 
@@ -161,7 +230,9 @@ void setup() {
             Serial.printf("[PROGRESS] %u/%u cycles\n", cycle + 1U, kCycleCount);
         }
     }
-    logLine("[PASS] SD_STRESS_100 create/write/read/verify/delete");
+    snprintf(resultBuffer.data(), resultBuffer.size(),
+             "[RESULT] PASS SD_STRESS_100 create/write/read/verify/delete");
+    logLine(resultBuffer.data());
     SD.end();
     completed = true;
 }
@@ -170,7 +241,7 @@ void loop() {
     static std::uint32_t lastHeartbeat = 0;
     if (completed && static_cast<std::uint32_t>(millis() - lastHeartbeat) >= 5000U) {
         lastHeartbeat = millis();
-        logLine("[IDLE] microSD diagnostic complete; reset to rerun");
+        logLine(resultBuffer.data());
     }
     delay(20);
 }

@@ -86,9 +86,9 @@ Updated: 2026-09-04
 | Controls diagnostic | pass | build | N16R8 standalone build uses InputService and explicit K1-K8 mapping |
 | Controls hardware | pass | connected/user action | K1-K8 debounced presses arrived in correct order; firmware emitted `[PASS] ALL 8 KEYS OBSERVED` |
 | Controls long press | partial | host | 600 ms one-shot behavior passes unit tests; physical long-press event was not observed in the capture window |
-| microSD diagnostic | pass | build | N16R8 build: 400 kHz mount retries, 4 MHz stress, 100 verified 2048-byte temporary files |
-| microSD hardware | pending wiring | visual | Buffered/regulator adapter identified; prior CMD8 failure remains unresolved until connected run |
-| SD stress | pending hardware | none | Requires inserted card and final `[PASS] SD_STRESS_100` marker |
+| microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
+| microSD hardware | fail | connected | MISO reads stuck-low: idle `00`, CMD0 `00`, CMD8 unavailable; mount failed on all three attempts |
+| SD stress | blocked by electrical fault | connected | Stress loop cannot start until power/MISO/card seating is corrected and CMD0 returns `01` |
 | IR through final stress test | not started | none | Follows connected microSD stress pass |
 
 ## Gate

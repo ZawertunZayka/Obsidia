@@ -31,7 +31,7 @@ for its MISO even though this display does not expose one.
 |---|---|---|---|---|---|
 | ST7735 SPI | SCK/SDA/CS/DC/RES/BL | GPIO12/GPIO11/GPIO10/GPIO9/GPIO14/GPIO21 | 3.3 V | 3.3 V | Confirmed: final diagnostic screen visible |
 | Shared local SPI | MISO | GPIO13 | 3.3 V | 3.3 V | Reserved for later SD/PN532 use |
-| microSD SPI | SCK/MOSI/MISO/CS | GPIO12/GPIO11/GPIO13/GPIO8 | 5VIN into onboard 3.3 V regulator | 3.3 V buffered | Assigned from photographed buffered adapter; physical test pending |
+| microSD SPI | SCK/MOSI/MISO/CS | GPIO12/GPIO11/GPIO13/GPIO8 | 5VIN into onboard 3.3 V regulator | 3.3 V buffered | Connected but failing: MISO stuck low; wiring/power inspection required |
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
 | IR | TX/RX | TBD | TBD | TBD | Unconfirmed |
 | buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | Confirmed: all eight debounced key presses observed |
