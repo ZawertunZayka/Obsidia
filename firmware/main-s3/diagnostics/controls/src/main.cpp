@@ -7,7 +7,7 @@
 namespace {
 
 constexpr std::array<std::uint8_t, obsidia::InputService::kKeyCount> kKeyPins = {
-    1, 2, 4, 5, 6, 7, 8, 15};
+    16, 15, 7, 6, 5, 4, 2, 1};
 
 obsidia::InputService input({25, 600});
 std::uint8_t observedPressMask = 0;

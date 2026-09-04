@@ -12,3 +12,5 @@ every input. Queue overflow is explicit and prevents silent input loss.
 
 The assignment is authoritative in `hardware/pinout/pinmap.md`. Do not infer a
 different order from physical button placement; use the K1-K8 silkscreen.
+The confirmed connector mapping is K1/K2/K3/K4/K5/K6/K7/K8 to
+GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1 respectively.

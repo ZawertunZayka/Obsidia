@@ -34,7 +34,7 @@ for its MISO even though this display does not expose one.
 | microSD SPI | SCLK/MOSI/MISO/CS | TBD | TBD | TBD | Unconfirmed |
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
 | IR | TX/RX | TBD | TBD | TBD | Unconfirmed |
-| buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO1/GPIO2/GPIO4/GPIO5/GPIO6/GPIO7/GPIO8/GPIO15/GND | Passive; no VCC | 3.3 V pull-ups | Assigned from photographed `8 Push Buttons V1.1`; physical test pending |
+| buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | User-requested connector order; physical test pending |
 | Radio UART | TX/RX | TBD | 3.3 V domain | TBD | Unconfirmed |
 | FPGA SPI | SCLK/MOSI/MISO/CS/IRQ | TBD | 3.3 V domain expected | TBD | Unconfirmed |
 | native USB | GPIO19/GPIO20 connector routing | GPIO19/GPIO20 | USB | USB | Confirmed by flash transport |
