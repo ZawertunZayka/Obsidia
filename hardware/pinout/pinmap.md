@@ -19,6 +19,7 @@ a working QinHeng USB-UART bridge. These board-owned signals are reserved:
 | GPIO0 | BOOT strap/button | Visible on carrier; reserve from peripherals |
 | GPIO3, GPIO45, GPIO46 | Strapping pins | Reserve until boot-level requirements are reviewed |
 | GPIO48 | Onboard RGB candidate | Visible beside RGB circuit; electrical mapping untested |
+| GPIO35, GPIO36, GPIO37 | N16R8 octal PSRAM signals | Do not use as GPIO on this module configuration |
 
 The first external assignment is the standalone ST7735 bring-up bus. SCLK and
 MOSI are reserved as a future shared local-peripheral SPI bus; GPIO13 is held
@@ -33,7 +34,7 @@ for its MISO even though this display does not expose one.
 | microSD SPI | SCLK/MOSI/MISO/CS | TBD | TBD | TBD | Unconfirmed |
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
 | IR | TX/RX | TBD | TBD | TBD | Unconfirmed |
-| keypad 4x2 | six/eight interface pins | TBD | TBD | TBD | Topology unconfirmed |
+| buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO1/GPIO2/GPIO4/GPIO5/GPIO6/GPIO7/GPIO8/GPIO15/GND | Passive; no VCC | 3.3 V pull-ups | Assigned from photographed `8 Push Buttons V1.1`; physical test pending |
 | Radio UART | TX/RX | TBD | 3.3 V domain | TBD | Unconfirmed |
 | FPGA SPI | SCLK/MOSI/MISO/CS/IRQ | TBD | 3.3 V domain expected | TBD | Unconfirmed |
 | native USB | GPIO19/GPIO20 connector routing | GPIO19/GPIO20 | USB | USB | Confirmed by flash transport |

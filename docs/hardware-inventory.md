@@ -12,7 +12,7 @@
 | Sub-GHz | CC1101, 433 MHz | Module revision unknown | Unverified | User report only |
 | 2.4 GHz | NRF24L01+ PA/LNA | Module revision unknown | Supply quality critical; unverified | User report only |
 | Infrared | IR TX/RX module | Parts/revision unknown | Unverified | User report only |
-| Controls | 4x2 buttons/keypad | Matrix/common topology unknown | Unverified | User report only |
+| Controls | `8 Push Buttons V1.1`, 4x2 layout | Eight independent normally-open buttons K1-K8 with common G | Passive; ESP32-S3 3.3 V internal pull-ups only | Clear front photo and visible K1-K8/G routing; connected test pending |
 
 The carrier's right-hand USB-C connector (viewed with antenna at the top) is a
 QinHeng `1A86:55D3` USB-UART bridge. The native connector enumerates as Espressif

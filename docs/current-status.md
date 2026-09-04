@@ -37,6 +37,9 @@ Updated: 2026-09-04
 - Hardware-independent `InputService` provides debounced press, release and
   one-shot long-press events for eight keys with a fixed 16-event queue,
   overflow accounting and wrap-safe timing.
+- The photographed controls are an `8 Push Buttons V1.1` passive common-ground
+  board. A dedicated N16R8 standalone diagnostic builds for its assigned GPIO
+  and requires all eight debounced presses before reporting pass.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
@@ -76,7 +79,8 @@ Updated: 2026-09-04
 | ST7735 hardware | pass | user observation | Final black screen with `OBSIDIA` / `DISPLAY OK` is visible; write-only panel cannot provide readback |
 | ST7735 color calibration | partial | programmed sequence | RGB/black/white sequence ran; individual color naming was not separately reported |
 | InputService | pass | host | Debounce, release, long-press, simultaneous keys, bounded queue and timer rollover pass |
-| Controls hardware | pending identification | none | 4x2 matrix/common topology and markings require front/back photos before GPIO assignment |
+| Controls diagnostic | pass | build | N16R8 standalone build uses InputService and explicit K1-K8 mapping |
+| Controls hardware | pending wiring | visual | `8 Push Buttons V1.1` common-ground topology identified; no connected key events yet |
 | SD through final stress test | not started | none | Follows connected controls standalone pass |
 
 ## Gate
