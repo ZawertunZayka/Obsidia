@@ -14,7 +14,7 @@
 | 2.4 GHz | NRF24L01+ PA/LNA | Module revision unknown | Supply quality critical; unverified | User report only |
 | Infrared TX | KY-005-style 940 nm LED board, no transistor, fitted `101` resistor | `S`, resistor-ground middle pin, and direct `-` pin identified | Driven from 3.3 V GPIO17; middle pin to GND; `-` left open | Front/back photos; physical camera test pending |
 | Infrared RX | Not yet identified | Unknown | Unverified | No receiver photo/module evidence |
-| Optional keyboard | M5Stack Unit CardKB | Grove I2C, address `0x5F` | M5Stack Grove supply requirements; not yet electrically connected | Front/back photos; not part of the confirmed 8-button control path |
+| Controls (active replacement) | M5Stack Unit CardKB v1.1 / U035-B, ATmega8A, 50 keys | Grove I2C address `0x5F`; black GND, red power, yellow SDA, white SCL | Official profile says 5 V; initial Obsidia test intentionally uses 3.3 V to protect ESP32-S3 | Front/back photos; standalone I2C test pending |
 | Controls | `8 Push Buttons V1.1`, 4x2 layout | Eight independent normally-open buttons K1-K8 with common G | Passive; ESP32-S3 3.3 V internal pull-ups only | Photo plus connected K1-K8 press events and firmware pass marker |
 
 The carrier's right-hand USB-C connector (viewed with antenna at the top) is a

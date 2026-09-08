@@ -35,7 +35,8 @@ for its MISO even though this display does not expose one.
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
 | IR TX (KY-005 type) | S / middle resistor-ground / `-` | GPIO17 / GND / NC | GPIO output through fitted 100 ohm resistor | 3.3 V GPIO | Assigned from photographed module; physical test pending |
 | IR RX | signal/power/ground | TBD | TBD | TBD | No receiver module identified |
-| buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | Confirmed: all eight debounced key presses observed |
+| CardKB controls | yellow SDA / white SCL / red power / black GND | GPIO40 / GPIO41 / 3V3 / GND | Conservative 3.3 V bring-up; official module profile is 5 V | I2C pulled only to 3.3 V during bring-up | Active replacement assignment; hardware test pending |
+| former buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | Previously passed; superseded by CardKB at user request |
 | Radio UART | TX/RX | TBD | 3.3 V domain | TBD | Unconfirmed |
 | FPGA SPI | SCLK/MOSI/MISO/CS/IRQ | TBD | 3.3 V domain expected | TBD | Unconfirmed |
 | native USB | GPIO19/GPIO20 connector routing | GPIO19/GPIO20 | USB | USB | Confirmed by flash transport |

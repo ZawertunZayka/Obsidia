@@ -41,7 +41,11 @@ Updated: 2026-09-04
   overflow accounting and wrap-safe timing.
 - The photographed controls are an `8 Push Buttons V1.1` passive common-ground
   board. A dedicated N16R8 standalone diagnostic builds for its assigned GPIO
-  and requires all eight debounced presses before reporting pass.
+  and previously passed all eight keys, but the user has now superseded it with
+  M5Stack CardKB.
+- M5Stack Unit CardKB v1.1 is selected as the active control device. A bounded
+  I2C `0x5F` standalone diagnostic is prepared on GPIO40/GPIO41 with conservative
+  3.3 V bring-up power; Bruce integration remains gated on a physical key event.
 - The original buffered six-pin microSD adapter was isolated as faulty and is
   quarantined. The non-formatting standalone diagnostic retains explicit mount
   retries and 100 destructive-only-to-temp-file create/write/read/verify/delete
@@ -94,6 +98,7 @@ Updated: 2026-09-04
 | Controls diagnostic | pass | build | N16R8 standalone build uses InputService and explicit K1-K8 mapping |
 | Controls hardware | pass | connected/user action | K1-K8 debounced presses arrived in correct order; firmware emitted `[PASS] ALL 8 KEYS OBSERVED` |
 | Controls long press | partial | host | 600 ms one-shot behavior passes unit tests; physical long-press event was not observed in the capture window |
+| CardKB replacement | pass build / pending hardware | build/visual | Unit CardKB v1.1 identified; bounded I2C 0x5F diagnostic builds for GPIO40/GPIO41; physical ACK/key pending |
 | microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
 | old microSD hardware | failed/quarantined | connected/isolation | Buffered adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
 | replacement microSD hardware | pending wiring | visual | Passive eight-pin 3.3 V SPI/SDIO breakout identified from front/back photos |
