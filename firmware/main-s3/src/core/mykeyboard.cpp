@@ -1141,6 +1141,14 @@ String generalKeyboard(
 #elif defined(HAS_KEYBOARD)  // Cardputer, T-Deck and T-LoRa-Pager
             if (KeyStroke.pressed) {
                 wakeUpScreen();
+#ifdef OBSIDIA_V1
+                // CardKB has a dedicated ESC byte. Obsidia uses it to cancel
+                // text entry instead of inserting an invisible character.
+                if (KeyStroke.exit_key) {
+                    KeyStroke.Clear();
+                    return "\x1B";
+                }
+#endif
                 tft.setCursor(cursor_x, cursor_y);
                 String keyStr = "";
                 for (auto i : KeyStroke.word) {

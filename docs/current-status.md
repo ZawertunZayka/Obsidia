@@ -1,6 +1,6 @@
 # Current status
 
-Updated: 2026-09-04
+Updated: 2026-09-08
 
 ## Completed
 
@@ -43,9 +43,14 @@ Updated: 2026-09-04
   board. A dedicated N16R8 standalone diagnostic builds for its assigned GPIO
   and previously passed all eight keys, but the user has now superseded it with
   M5Stack CardKB.
-- M5Stack Unit CardKB v1.1 is selected as the active control device. A bounded
-  I2C `0x5F` standalone diagnostic is prepared on GPIO40/GPIO41 with conservative
-  3.3 V bring-up power; Bruce integration remains gated on a physical key event.
+- M5Stack Unit CardKB v1.1 is the active control device. Its bounded I2C `0x5F`
+  standalone diagnostic passed on GPIO40/GPIO41 at 3.3 V: address ACK, printable
+  keys, Enter, Escape and direction bytes were observed.
+- The permanent Bruce `OBSIDIA_V1` target now selects the confirmed ESP32-S3
+  N16R8 memory layout, ST7735, CardKB, shared-bus microSD and native USB HID.
+  The corrected image with ST7735 inversion and CardKB text-entry support built
+  and flashed successfully with verified hashes. Physical confirmation of the
+  corrected colors and Wi-Fi password controls is pending.
 - The original buffered six-pin microSD adapter was isolated as faulty and is
   quarantined. The non-formatting standalone diagnostic retains explicit mount
   retries and 100 destructive-only-to-temp-file create/write/read/verify/delete
@@ -73,7 +78,7 @@ Updated: 2026-09-04
 | Main RadioService | pass | host/build | State-machine tests pass and complete Bruce control build succeeds |
 | Main FpgaService | pass | host/build | Recovery/FIFO/control tests pass and complete Bruce control build succeeds |
 | Diagnostics model | pass | host/build | Inventory/mapping/bounds tests pass; S3 object compiles |
-| Diagnostics UI | pending target | build guard | Menu is isolated behind `OBSIDIA_V1`; target awaits board identity |
+| Diagnostics UI | pass build/upload | connected | `OBSIDIA_V1` menu is linked into the permanent Bruce image |
 | RDM6300 parser/diagnostic | pass | host/build | Framing/checksum/resync/timeout tests and ESP32 build pass |
 | RDM6300 hardware | pending wiring | none | RX GPIO unset; no physical tag evidence |
 | CC1101 diagnostic | pass | host/build | Failure paths and register restoration tested; ESP32 build succeeds |
@@ -98,10 +103,10 @@ Updated: 2026-09-04
 | Controls diagnostic | pass | build | N16R8 standalone build uses InputService and explicit K1-K8 mapping |
 | Controls hardware | pass | connected/user action | K1-K8 debounced presses arrived in correct order; firmware emitted `[PASS] ALL 8 KEYS OBSERVED` |
 | Controls long press | partial | host | 600 ms one-shot behavior passes unit tests; physical long-press event was not observed in the capture window |
-| CardKB replacement | partial hardware pass | connected | Unit CardKB v1.1 repeatedly ACKs at I2C 0x5F on GPIO40/GPIO41 while powered safely from 3.3 V; physical key event pending |
+| CardKB replacement | pass | connected | Unit CardKB v1.1 ACKs at 0x5F and emitted printable, Enter, Escape and arrow bytes at 3.3 V |
 | microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
 | old microSD hardware | failed/quarantined | connected/isolation | Buffered adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
-| replacement microSD hardware | pending wiring | visual | Passive eight-pin 3.3 V SPI/SDIO breakout identified from front/back photos |
+| replacement microSD hardware | connected, test pending | user wiring | Passive eight-pin breakout is wired to GPIO8/11/12/13 at 3.3 V with DO1/DO2 open |
 | SD stress | pending replacement test | build | Existing bounded 100-cycle diagnostic is compatible with the replacement SPI pinout |
 | IR TX diagnostic | pass build/upload / inconclusive hardware | build/connected | N16R8 image and 38 kHz burst logs pass; user saw no light with an uncalibrated phone camera and has no reference remote |
 | IR RX through final stress test | not started | none | Receiver hardware has not been identified |

@@ -86,5 +86,15 @@ request. The standalone diagnostic uses SDA GPIO40, SCL GPIO41 and 100 kHz I2C.
 Although the manufacturer Grove profile specifies 5 V power, the initial
 Obsidia bring-up deliberately used 3.3 V so no undocumented pull-up could expose
 ESP32-S3 GPIO to 5 V. The keyboard repeatedly acknowledged address `0x5F` at
-3.3 V, so that safer supply is retained. A real key byte is still required
-before declaring the replacement input hardware passed.
+3.3 V, so that safer supply is retained. Printable keys, Enter (`0x0D`), Escape
+(`0x1B`) and arrow bytes (`0xB4`-`0xB7`) were received, completing the physical
+input test.
+
+## Permanent Bruce target
+
+`OBSIDIA_V1` is now the only main-board firmware used during continued bring-up.
+Display, CardKB and SD diagnostics are integrated into this Bruce working tree;
+later changes are flashed as updated Bruce images instead of replacing it with
+standalone sketches. The replacement passive SD board is connected, but mount
+and 100-cycle filesystem stress evidence are still required before SD is marked
+passed.

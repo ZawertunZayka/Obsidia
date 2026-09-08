@@ -3,6 +3,7 @@
 #ifdef OBSIDIA_V1
 
 #include "core/display.h"
+#include "core/utils.h"
 
 obsidia::DiagnosticsModel obsidiaDiagnosticsModel;
 

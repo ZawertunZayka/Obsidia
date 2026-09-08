@@ -1,7 +1,7 @@
 # Authoritative pin map
 
-**No GPIO assignment is currently confirmed. Do not wire from example values in
-upstream Bruce board profiles.**
+**Use only assignments marked confirmed or assigned in this document. Do not
+wire from example values in upstream Bruce board profiles.**
 
 The generic Bruce `esp32-s3-devkitc-1` profile contains illustrative/default
 pins, but these are not Obsidia assignments and must not be copied blindly.
@@ -35,7 +35,7 @@ for its MISO even though this display does not expose one.
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
 | IR TX (KY-005 type) | S / middle resistor-ground / `-` | GPIO17 / GND / NC | GPIO output through fitted 100 ohm resistor | 3.3 V GPIO | Assigned from photographed module; physical test pending |
 | IR RX | signal/power/ground | TBD | TBD | TBD | No receiver module identified |
-| CardKB controls | yellow SDA / white SCL / red power / black GND | GPIO40 / GPIO41 / 3V3 / GND | Conservative 3.3 V bring-up; official module profile is 5 V | I2C pulled only to 3.3 V during bring-up | Active replacement assignment; hardware test pending |
+| CardKB controls | yellow SDA / white SCL / red power / black GND | GPIO40 / GPIO41 / 3V3 / GND | Conservative 3.3 V supply retained | I2C at 100 kHz, address 0x5F | Confirmed: ACK and physical key bytes received |
 | former buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | Previously passed; superseded by CardKB at user request |
 | Radio UART | TX/RX | TBD | 3.3 V domain | TBD | Unconfirmed |
 | FPGA SPI | SCLK/MOSI/MISO/CS/IRQ | TBD | 3.3 V domain expected | TBD | Unconfirmed |

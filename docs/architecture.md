@@ -3,7 +3,7 @@
 ## Responsibilities
 
 The ESP32-S3 is the system master and owns the user experience. Bruce, the
-ST7735 display, 4x2 controls, microSD, PN532, IR, native USB, Wi-Fi and BLE all
+ST7735 display, CardKB controls, microSD, PN532, IR, native USB, Wi-Fi and BLE all
 run locally. `RadioService` talks to the ESP32 DevKit over ObsidiaLink/UART;
 `FpgaService` talks to the Tang Nano 20K over SPI. UI code consumes service
 state and never frames bus transactions.
@@ -19,7 +19,7 @@ extensions that preserve the original register ABI.
 ## Service boundaries
 
 - `DisplayService`: Bruce display backend or the smallest board-specific adaptation.
-- `InputService`: debounced logical events from the 4x2 controls.
+- `InputService`: logical navigation and text events from the I2C CardKB.
 - `StorageService`: SD initialization, diagnostics and filesystem operations.
 - `NfcService`: PN532 discovery and operations.
 - `IrService`: IR transmit/receive diagnostics and Bruce integration.
