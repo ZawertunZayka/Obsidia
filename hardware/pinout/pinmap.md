@@ -31,7 +31,7 @@ for its MISO even though this display does not expose one.
 |---|---|---|---|---|---|
 | ST7735 SPI | SCK/SDA/CS/DC/RES/BL | GPIO12/GPIO11/GPIO10/GPIO9/GPIO14/GPIO21 | 3.3 V | 3.3 V | Confirmed: final diagnostic screen visible |
 | Shared local SPI | MISO | GPIO13 | 3.3 V | 3.3 V | Reserved for later SD/PN532 use |
-| microSD SPI | SCK/MOSI/MISO/CS | GPIO12/GPIO11/GPIO13/GPIO8 | 5VIN into onboard 3.3 V regulator | 3.3 V buffered | Connected but failing: MISO stuck low; wiring/power inspection required |
+| microSD SPI (passive 8-pin breakout) | CLK/CMD-MOSI/DO-MISO/DO3-CS | GPIO12/GPIO11/GPIO13/GPIO8 | 3.3 V only | Native 3.3 V card bus | Assigned from photos; physical stress test pending |
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
 | IR TX (KY-005 type) | S / middle resistor-ground / `-` | GPIO17 / GND / NC | GPIO output through fitted 100 ohm resistor | 3.3 V GPIO | Assigned from photographed module; physical test pending |
 | IR RX | signal/power/ground | TBD | TBD | TBD | No receiver module identified |

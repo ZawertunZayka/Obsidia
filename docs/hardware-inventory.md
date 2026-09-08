@@ -6,13 +6,15 @@
 | Radio MCU | ESP32 DevKit V1, 38 pin | Exact module/revision unknown | 3.3 V logic expected; unverified | User report only |
 | FPGA | Tang Nano 20K, GW2AR-18 | Exact board revision unknown | Unverified | User report only |
 | Display | ST7735, 1.8 in, 128x160 write-only SPI | `1.8\" TFT 128*RGB*160 VER 1.0`, pins BL/CS/DC/RES/SDA/SCK/VCC/GND | Supply and logic constrained to 3.3 V | Front/back photos and visible `OBSIDIA` / `DISPLAY OK` standalone result |
-| Storage | Six-pin `MicroSD Card Adapter` with 1117-class regulator and LVC125A-like 14-pin buffer | CS/SCK/MOSI/MISO/VCC/GND silk confirmed; exact IC markings too faint to read | 5VIN assigned; regulator output still needs measurement | Connected probe: buffer holds MISO low even without card; no CMD0 response and all mounts fail |
+| Storage (active target) | Passive eight-pin microSD SPI/SDIO breakout with resistor pull-ups | `GND, DO2, DO3/CS, CMD/MOSI, CLK, DO/MISO, DO1, VCC` silk confirmed | 3.3 V supply and logic only; no regulator/level shifter visible | Front/back photos; standalone stress test pending |
+| Storage (quarantined) | Six-pin adapter with 1117-class regulator and LVC125A-like buffer | CS/SCK/MOSI/MISO/VCC/GND | 5VIN input, 3.3 V buffered bus | Adapter holds MISO low with and without a card; no CMD0 response |
 | NFC | PN532, 13.56 MHz | Interface selector/revision unknown | Unverified | User report only |
 | LF RFID | RDM6300, 125 kHz EM4100 | Revision unknown | Unverified | User report only |
 | Sub-GHz | CC1101, 433 MHz | Module revision unknown | Unverified | User report only |
 | 2.4 GHz | NRF24L01+ PA/LNA | Module revision unknown | Supply quality critical; unverified | User report only |
 | Infrared TX | KY-005-style 940 nm LED board, no transistor, fitted `101` resistor | `S`, resistor-ground middle pin, and direct `-` pin identified | Driven from 3.3 V GPIO17; middle pin to GND; `-` left open | Front/back photos; physical camera test pending |
 | Infrared RX | Not yet identified | Unknown | Unverified | No receiver photo/module evidence |
+| Optional keyboard | M5Stack Unit CardKB | Grove I2C, address `0x5F` | M5Stack Grove supply requirements; not yet electrically connected | Front/back photos; not part of the confirmed 8-button control path |
 | Controls | `8 Push Buttons V1.1`, 4x2 layout | Eight independent normally-open buttons K1-K8 with common G | Passive; ESP32-S3 3.3 V internal pull-ups only | Photo plus connected K1-K8 press events and firmware pass marker |
 
 The carrier's right-hand USB-C connector (viewed with antenna at the top) is a

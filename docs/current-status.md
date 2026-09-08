@@ -42,10 +42,13 @@ Updated: 2026-09-04
 - The photographed controls are an `8 Push Buttons V1.1` passive common-ground
   board. A dedicated N16R8 standalone diagnostic builds for its assigned GPIO
   and requires all eight debounced presses before reporting pass.
-- The buffered six-pin microSD adapter is identified and assigned to the shared
-  local SPI bus with GPIO8 chip-select. Its non-formatting standalone diagnostic
-  builds with explicit mount retries and 100 destructive-only-to-temp-file
-  create/write/read/verify/delete cycles.
+- The original buffered six-pin microSD adapter was isolated as faulty and is
+  quarantined. The non-formatting standalone diagnostic retains explicit mount
+  retries and 100 destructive-only-to-temp-file create/write/read/verify/delete
+  cycles for the replacement hardware.
+- A photographed passive eight-pin microSD SPI/SDIO breakout replaces the
+  quarantined buffered adapter as the active SD target. It is assigned to the
+  same SPI GPIO but must be powered from 3.3 V, with DO2/DO1 left unconnected.
 - Photographed IR hardware is a KY-005-style transmitter-only board. GPIO17 is
   assigned for its protected `S` path and a bounded 38 kHz camera diagnostic is
   prepared; an IR receiver has not yet been identified.
@@ -92,8 +95,9 @@ Updated: 2026-09-04
 | Controls hardware | pass | connected/user action | K1-K8 debounced presses arrived in correct order; firmware emitted `[PASS] ALL 8 KEYS OBSERVED` |
 | Controls long press | partial | host | 600 ms one-shot behavior passes unit tests; physical long-press event was not observed in the capture window |
 | microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
-| microSD hardware | fail under diagnosis | connected/isolation | Adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
-| SD stress | blocked by adapter/power | connected | Requires a 3.3 V regulator-output measurement or replacement adapter before rerun; no Bruce integration allowed |
+| old microSD hardware | failed/quarantined | connected/isolation | Buffered adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
+| replacement microSD hardware | pending wiring | visual | Passive eight-pin 3.3 V SPI/SDIO breakout identified from front/back photos |
+| SD stress | pending replacement test | build | Existing bounded 100-cycle diagnostic is compatible with the replacement SPI pinout |
 | IR TX diagnostic | pass build/upload / inconclusive hardware | build/connected | N16R8 image and 38 kHz burst logs pass; user saw no light with an uncalibrated phone camera and has no reference remote |
 | IR RX through final stress test | not started | none | Receiver hardware has not been identified |
 
