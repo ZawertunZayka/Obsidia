@@ -11,11 +11,13 @@ constexpr int kSclPin = 41;
 constexpr std::uint32_t kI2cFrequencyHz = 100000;
 constexpr std::uint32_t kPollIntervalMs = 20;
 constexpr std::uint32_t kPresenceIntervalMs = 1000;
+constexpr std::uint32_t kStatusIntervalMs = 5000;
 
 bool present = false;
 bool keyPassReported = false;
 std::uint32_t lastPollMs = 0;
 std::uint32_t lastPresenceMs = 0;
+std::uint32_t lastStatusMs = 0;
 std::uint32_t keyCount = 0;
 
 void logLine(const char *message) {
@@ -59,6 +61,7 @@ void setup() {
     present = probe();
     logLine(present ? "[OK] CARDKB_ADDRESS_ACK" : "[ERROR] CARDKB_NO_ACK");
     lastPresenceMs = millis();
+    lastStatusMs = millis();
 }
 
 void loop() {
@@ -81,6 +84,11 @@ void loop() {
             const int value = Wire.read();
             if (value > 0) reportKey(static_cast<std::uint8_t>(value));
         }
+    }
+    if (static_cast<std::uint32_t>(now - lastStatusMs) >= kStatusIntervalMs) {
+        lastStatusMs = now;
+        logLine(present ? "[STATUS] CARDKB_ADDRESS_ACK"
+                        : "[STATUS] CARDKB_NO_ACK");
     }
     delay(1);
 }

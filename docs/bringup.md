@@ -78,3 +78,13 @@ second on/one second off at 25% duty and reflashed. The user still saw no light,
 but the phone camera has not been validated against a known IR source. Hardware
 pass therefore remains inconclusive pending a wiring photo, calibrated IR
 camera/receiver, or electrical measurement.
+
+## CardKB replacement controls
+
+M5Stack Unit CardKB v1.1 replaces the former passive 4x2 controls at the user's
+request. The standalone diagnostic uses SDA GPIO40, SCL GPIO41 and 100 kHz I2C.
+Although the manufacturer Grove profile specifies 5 V power, the initial
+Obsidia bring-up deliberately used 3.3 V so no undocumented pull-up could expose
+ESP32-S3 GPIO to 5 V. The keyboard repeatedly acknowledged address `0x5F` at
+3.3 V, so that safer supply is retained. A real key byte is still required
+before declaring the replacement input hardware passed.
