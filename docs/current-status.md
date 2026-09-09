@@ -57,15 +57,29 @@ Updated: 2026-09-09
   `/Cyberpunk_2077_v1.0.0`; all 15 files match the source archive.
 - CardKB input now suppresses repeated reports of a held key until release,
   preventing the Enter used for `Theme -> SD Card` from immediately selecting
-  the file browser's `>back` entry. The corrected Bruce image builds cleanly;
-  physical confirmation is pending.
+  the file browser's `>back` entry. The corrected Bruce image built and flashed
+  successfully with verified hashes; physical confirmation is pending.
 - The original buffered six-pin microSD adapter was isolated as faulty and is
   quarantined. The non-formatting standalone diagnostic retains explicit mount
   retries and 100 destructive-only-to-temp-file create/write/read/verify/delete
   cycles for the replacement hardware.
+- Bruce issue #2445 reproduces the same visible `Files -> SD Card`/vanishing-icon
+  symptom and was closed with release 1.16. The Obsidia tree is already based
+  on 1.16.1 and includes that release's exFAT-capable framework package, so the
+  upstream issue is useful corroboration but is not the missing local fix.
 - A photographed passive eight-pin microSD SPI/SDIO breakout replaces the
   quarantined buffered adapter as the active SD target. It is assigned to the
-  same SPI GPIO but must be powered from 3.3 V, with DO2/DO1 left unconnected.
+  same SPI GPIO and powered from 3.3 V, with DO2/DO1 left unconnected. A
+  firmware-level 100 kHz raw SPI probe receives `0xFF` for all 32 response
+  bytes after a standards-compliant CMD0; the card is therefore not responding
+  electrically before any filesystem/Bruce code runs. Wiring, card seating,
+  continuity and 3.3 V at the socket require physical verification. A second
+  pre-display GPIO test detects the breakout's external pull-ups on all four
+  SPI lines, proving the breakout is powered and connected to GPIO8/11/12/13.
+  A driver-independent approximately 10 kHz bit-banged CMD0 still returns only
+  `0xFF`; this excludes Bruce, FatFS, SPI frequency and the ESP32 hardware SPI
+  driver, leaving the card-to-socket contact or breakout hardware as the active
+  fault domain.
 - Photographed IR hardware is a KY-005-style transmitter-only board. GPIO17 is
   assigned for its protected `S` path and a bounded 38 kHz camera diagnostic is
   prepared; an IR receiver has not yet been identified.
@@ -114,7 +128,7 @@ Updated: 2026-09-09
 | CardKB replacement | pass | connected | Unit CardKB v1.1 ACKs at 0x5F and emitted printable, Enter, Escape and arrow bytes at 3.3 V |
 | microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
 | old microSD hardware | failed/quarantined | connected/isolation | Buffered adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
-| replacement microSD hardware | connected, test pending | user wiring | Passive eight-pin breakout is wired to GPIO8/11/12/13 at 3.3 V with DO1/DO2 open |
+| replacement microSD hardware | failed / card-to-socket hardware check required | connected/raw + bit-bang SPI | All breakout pull-ups reach GPIO8/11/12/13, but both 100 kHz hardware-SPI and ~10 kHz bit-bang CMD0 return only `0xFF` |
 | SD stress | pending replacement test | build | Existing bounded 100-cycle diagnostic is compatible with the replacement SPI pinout |
 | IR TX diagnostic | pass build/upload / inconclusive hardware | build/connected | N16R8 image and 38 kHz burst logs pass; user saw no light with an uncalibrated phone camera and has no reference remote |
 | IR RX through final stress test | not started | none | Receiver hardware has not been identified |

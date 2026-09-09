@@ -26,6 +26,47 @@
 String fileToCopy;
 std::vector<FileList> fileList;
 
+#ifdef OBSIDIA_V1
+static uint8_t obsidiaProbeSdCmd0(SPIClass &bus, int8_t csPin) {
+    constexpr uint32_t kProbeHz = 100000UL;
+    constexpr uint8_t kCmd0[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95};
+
+    pinMode(TFT_CS, OUTPUT);
+    pinMode(csPin, OUTPUT);
+    digitalWrite(TFT_CS, HIGH);
+    digitalWrite(csPin, HIGH);
+
+    bus.beginTransaction(SPISettings(kProbeHz, MSBFIRST, SPI_MODE0));
+    uint8_t idleSample = 0;
+    for (uint8_t i = 0; i < 10; ++i) idleSample = bus.transfer(0xFF);
+
+    digitalWrite(csPin, LOW);
+    for (uint8_t byte : kCmd0) bus.transfer(byte);
+
+    uint8_t response = 0xFF;
+    uint8_t responseOffset = 0xFF;
+    for (uint8_t i = 0; i < 32; ++i) {
+        response = bus.transfer(0xFF);
+        if ((response & 0x80U) == 0) {
+            responseOffset = i;
+            break;
+        }
+    }
+
+    digitalWrite(csPin, HIGH);
+    bus.transfer(0xFF);
+    bus.endTransaction();
+
+    Serial.printf(
+        "[OBSIDIA][SD][RAW] idle-miso=0x%02X cmd0=0x%02X byte=%u (expected cmd0=0x01)\n",
+        idleSample,
+        response,
+        responseOffset
+    );
+    return response;
+}
+#endif
+
 /***************************************************************************************
 ** Function name: setupLittleFS
 ** Description:   Start LittleFS
@@ -84,7 +125,38 @@ bool setupSdCard(uint8_t maxFiles) {
         );
         if (bus != nullptr && bus != &sdcardSPI) {
             Serial.println("SDCard in the same Bus as TFT, using TFT SPI instance");
+#ifdef OBSIDIA_V1
+            // Breadboard wiring and passive breakouts need the SD-defined
+            // identification clock. Keep the mounted card at this conservative
+            // speed until the replacement hardware passes the standalone
+            // 4 MHz stress test.
+            constexpr uint32_t kObsidiaSdInitHz = 400000UL;
+            constexpr uint8_t kObsidiaSdMountAttempts = 3;
+            bool mounted = false;
+            for (uint8_t attempt = 1; attempt <= kObsidiaSdMountAttempts; ++attempt) {
+                pinMode(TFT_CS, OUTPUT);
+                digitalWrite(TFT_CS, HIGH);
+                pinMode(bruceConfigPins.SDCARD_bus.cs, OUTPUT);
+                digitalWrite(bruceConfigPins.SDCARD_bus.cs, HIGH);
+                delay(20);
+                if (attempt == 1) obsidiaProbeSdCmd0(*bus, bruceConfigPins.SDCARD_bus.cs);
+                Serial.printf(
+                    "[OBSIDIA][SD] mount attempt=%u/%u frequency=%lu Hz\n",
+                    attempt,
+                    kObsidiaSdMountAttempts,
+                    static_cast<unsigned long>(kObsidiaSdInitHz)
+                );
+                if (SD.begin(bruceConfigPins.SDCARD_bus.cs, *bus, kObsidiaSdInitHz, "/sd", maxFiles)) {
+                    mounted = true;
+                    break;
+                }
+                SD.end();
+                delay(250);
+            }
+            if (!mounted) {
+#else
             if (!SD.begin(bruceConfigPins.SDCARD_bus.cs, *bus, 4000000UL, "/sd", maxFiles)) {
+#endif
                 result = false;
                 Serial.println("SDCard in the same Bus as TFT, but failed to mount");
             }
@@ -599,9 +671,43 @@ void readFs(FS &fs, const String &folder, const String &allowed_ext) {
 **  Where you choose what to do with your SD Files
 **********************************************************************/
 String loopSD(FS &fs, bool filePicker, const String &allowed_ext, String rootPath) {
+#ifdef OBSIDIA_V1
+    // A menu transition can leave a navigation event pending while the CardKB
+    // input task is running. Consume that transition state before displaying
+    // the new browser so it cannot immediately leave or select an item.
+    vTaskSuspend(xHandle);
+    NextPress = false;
+    PrevPress = false;
+    UpPress = false;
+    DownPress = false;
+    SelPress = false;
+    EscPress = false;
+    AnyKeyPress = false;
+    NextPagePress = false;
+    PrevPagePress = false;
+    LongPress = false;
+    KeyStroke.Clear();
+    vTaskResume(xHandle);
+    Serial.printf(
+        "[OBSIDIA][FILES] enter fs=%s root=%s mounted=%d\n",
+        &fs == &SD ? "SD" : "LittleFS",
+        rootPath.c_str(),
+        sdcardMounted
+    );
+#endif
     delay(10);
     if (!fs.exists(rootPath)) {
         Serial.println("loopSD-> 1st exist test failed");
+#ifdef OBSIDIA_V1
+        // sdcardMounted records the last successful mount, not the current
+        // health of the SPI/FS object. Remount once after a failed probe.
+        if (&fs == &SD) {
+            Serial.println("[OBSIDIA][FILES] SD root unavailable; remounting");
+            closeSdCard();
+            delay(20);
+            setupSdCard();
+        }
+#endif
         rootPath = "/";
         if (!fs.exists(rootPath)) {
             Serial.println("loopSD-> 2nd exist test failed");
@@ -632,6 +738,13 @@ String loopSD(FS &fs, bool filePicker, const String &allowed_ext, String rootPat
     // returnToMenu=true;  // make sure menu is redrawn when quitting in any point
 
     readFs(fs, Folder, allowed_ext);
+
+    if (fileList.empty()) {
+        Serial.println("[OBSIDIA][FILES] failed to open directory");
+        if (&fs == &SD) sdcardMounted = false;
+        displayError("Fail Reading SD", true);
+        return "";
+    }
 
     maxFiles = fileList.size() - 1; // discount the >back operator
     LongPress = false;
