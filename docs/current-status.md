@@ -50,9 +50,9 @@ Updated: 2026-09-09
   N16R8 memory layout, ST7735, CardKB, shared-bus microSD and native USB HID.
   The corrected image with CardKB text-entry support built and flashed
   successfully with verified hashes. Physical feedback showed that this panel
-  needs the opposite state from Bruce's default, so the current follow-up build
-  persists `colorInverted=0` after loading settings and applies `INVOFF`;
-  physical confirmation is pending.
+  needs the opposite state from Bruce's default. The follow-up build persists
+  `colorInverted=0` after loading settings, applies `INVOFF`, and was flashed
+  successfully with verified hashes; physical confirmation is pending.
 - The Cyberpunk 2077 Bruce theme was validated and copied to the microSD as
   `/Cyberpunk_2077_v1.0.0`; all 15 files match the source archive.
 - The original buffered six-pin microSD adapter was isolated as faulty and is
