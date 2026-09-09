@@ -84,6 +84,12 @@ void _setup_gpio() {
 }
 
 void _post_setup_gpio() {
+    // The persisted Bruce setting is loaded after _setup_gpio().  Force the
+    // panel-specific inversion here so an older config cannot restore the
+    // incorrect ST7735 color order.  setColorInverted() writes only once.
+    if (bruceConfig.colorInverted != 1) bruceConfig.setColorInverted(1);
+    tft.invertDisplay(true);
+
     pinMode(TFT_BL, OUTPUT);
     ledcAttach(TFT_BL, 5000, 8);
     ledcWrite(TFT_BL, 255);

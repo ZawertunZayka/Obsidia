@@ -1,6 +1,6 @@
 # Current status
 
-Updated: 2026-09-08
+Updated: 2026-09-09
 
 ## Completed
 
@@ -48,9 +48,12 @@ Updated: 2026-09-08
   keys, Enter, Escape and direction bytes were observed.
 - The permanent Bruce `OBSIDIA_V1` target now selects the confirmed ESP32-S3
   N16R8 memory layout, ST7735, CardKB, shared-bus microSD and native USB HID.
-  The corrected image with ST7735 inversion and CardKB text-entry support built
-  and flashed successfully with verified hashes. Physical confirmation of the
-  corrected colors and Wi-Fi password controls is pending.
+  The corrected image with CardKB text-entry support built and flashed
+  successfully with verified hashes. A follow-up build now forces the required
+  ST7735 inversion after loading persisted Bruce settings, so an older config
+  cannot restore the wrong color order; physical confirmation is pending.
+- The Cyberpunk 2077 Bruce theme was validated and copied to the microSD as
+  `/Cyberpunk_2077_v1.0.0`; all 15 files match the source archive.
 - The original buffered six-pin microSD adapter was isolated as faulty and is
   quarantined. The non-formatting standalone diagnostic retains explicit mount
   retries and 100 destructive-only-to-temp-file create/write/read/verify/delete
