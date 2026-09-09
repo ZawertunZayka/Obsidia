@@ -55,6 +55,10 @@ Updated: 2026-09-09
   successfully with verified hashes; physical confirmation is pending.
 - The Cyberpunk 2077 Bruce theme was validated and copied to the microSD as
   `/Cyberpunk_2077_v1.0.0`; all 15 files match the source archive.
+- CardKB input now suppresses repeated reports of a held key until release,
+  preventing the Enter used for `Theme -> SD Card` from immediately selecting
+  the file browser's `>back` entry. The corrected Bruce image builds cleanly;
+  physical confirmation is pending.
 - The original buffered six-pin microSD adapter was isolated as faulty and is
   quarantined. The non-formatting standalone diagnostic retains explicit mount
   retries and 100 destructive-only-to-temp-file create/write/read/verify/delete

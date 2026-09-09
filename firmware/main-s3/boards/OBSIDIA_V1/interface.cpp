@@ -18,6 +18,7 @@ constexpr uint8_t kKeyDown = 0xB6;
 constexpr uint8_t kKeyRight = 0xB7;
 
 bool cardKbPresent = false;
+uint8_t activeCardKbKey = 0;
 
 bool probeCardKb() {
     Wire.beginTransmission(kCardKbAddress);
@@ -114,6 +115,7 @@ void InputHandler() {
         const bool detected = probeCardKb();
         if (detected != cardKbPresent) {
             cardKbPresent = detected;
+            activeCardKbKey = 0;
             Serial.printf("[OBSIDIA] CardKB: %s\n", cardKbPresent ? "reconnected" : "disconnected");
         }
     }
@@ -125,9 +127,17 @@ void InputHandler() {
     lastPollMs = now;
     const uint8_t key = readCardKb();
     if (key == 0) {
+        activeCardKbKey = 0;
         KeyStroke.pressed = false;
         return;
     }
+    // CardKB can report a held key on consecutive I2C polls.  Publish only
+    // the press edge so Enter cannot select an item in the newly opened menu.
+    if (key == activeCardKbKey) {
+        KeyStroke.pressed = false;
+        return;
+    }
+    activeCardKbKey = key;
     publishKey(key);
 }
 
