@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include <Wire.h>
+#include <esp_heap_caps.h>
 #include <esp_partition.h>
+#include <freertos/idf_additions.h>
 #include <obsidia_doom.h>
 
 #include "core/display.h"
@@ -36,8 +38,9 @@ extern "C" void obsidia_doom_start(void) {
     tft.setTextColor(TFT_RED, TFT_BLACK);
     tft.setTextDatum(MC_DATUM);
     tft.drawString("DOOM", tft.width() / 2, tft.height() / 2);
-    const BaseType_t created =
-        xTaskCreatePinnedToCore(doomTask, "obsidia-doom", 24576, nullptr, 3, &doomTaskHandle, 0);
+    const BaseType_t created = xTaskCreatePinnedToCoreWithCaps(
+        doomTask, "obsidia-doom", 32768, nullptr, 3, &doomTaskHandle, 0, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT
+    );
     if (created != pdPASS) {
         doomTaskHandle = nullptr;
         Serial.println("[DOOM] ERROR: unable to create engine task");

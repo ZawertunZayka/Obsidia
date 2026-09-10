@@ -147,5 +147,7 @@ standalone diagnostic and physical observation before Bruce integration.
 - `doom1-cut.wad` is stored in a dedicated internal-flash partition at
   `0x600000`; microSD is not used by Doom.
 - The `OBSIDIA_V1` firmware build passes with the integrated engine.
+- The Doom task stack is allocated from PSRAM so it does not depend on Bruce's
+  fragmented internal heap after startup.
 - Physical display and gameplay validation remain unconfirmed until the TFT
   is connected and the firmware/WAD have been flashed to the board.
