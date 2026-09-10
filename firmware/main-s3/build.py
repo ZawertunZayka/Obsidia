@@ -34,6 +34,8 @@ part_bin = build_dir / "partitions.bin"
 app_bin  = build_dir / "firmware.bin"
 
 out_bin  = proj_dir / f"Bruce-{pioenv}.bin"
+doom_wad = proj_dir / "lib" / "ObsidiaDoom" / "assets" / "doom1-cut.wad"
+doom_wad_offset = 0x600000
 
 # Esptool from PlatformIO + Python executable
 esptool_pkg = senv.PioPlatform().get_package_dir("tool-esptoolpy")
@@ -106,6 +108,7 @@ def _merge_bins_callback(target, source, env):
         hex(boot_offset), q(boot_bin),
         hex(PART_TABLE_OFFSET), q(part_bin),
         hex(APP_OFFSET), q(app_bin),
+        *([hex(doom_wad_offset), q(doom_wad)] if pioenv == "OBSIDIA_V1" and doom_wad.exists() else []),
     ])
 
     print("[merge_bin] Merging binaries:")
@@ -141,6 +144,21 @@ senv.AddCustomTarget(
     title="Build Firmware (merge)",
     description="Merge bootloader + partitions + app into a single .bin file"
 )
+
+if pioenv == "OBSIDIA_V1":
+    senv.AddCustomTarget(
+        name="upload-doomwad",
+        dependencies=None,
+        actions=[
+            " ".join([
+                f'"{python_exe}"', "-m", "platformio", "pkg", "exec", "-p", '"tool-esptoolpy"',
+                "--", "esptool", "--chip", "esp32s3", "--port", '"$UPLOAD_PORT"',
+                "write-flash", hex(doom_wad_offset), f'"{doom_wad}"',
+            ])
+        ],
+        title="Upload Obsidia Doom WAD",
+        description="Write the bundled shareware WAD to the internal doomwad partition",
+    )
 
 # Keep your upload-nobuild helper
 senv.AddCustomTarget(

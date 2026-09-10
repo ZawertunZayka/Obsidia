@@ -21,6 +21,7 @@
 #include "menu_items/WifiMenu.h"
 #ifdef OBSIDIA_V1
 #include "obsidia/diagnostics/ObsidiaDiagnosticsMenu.h"
+#include "menu_items/GamesMenu.h"
 #endif
 class MainMenu {
 public:
@@ -40,6 +41,7 @@ public:
     WifiMenu wifiMenu;
 #ifdef OBSIDIA_V1
     ObsidiaDiagnosticsMenu obsidiaDiagnosticsMenu;
+    GamesMenu gamesMenu;
 #endif
 #if !defined(LITE_VERSION)
     LoRaMenu loraMenu;

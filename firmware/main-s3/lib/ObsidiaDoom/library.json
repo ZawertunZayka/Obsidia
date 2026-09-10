@@ -1,0 +1,19 @@
+{
+  "name": "ObsidiaDoom",
+  "version": "0.1.0",
+  "description": "Obsidia ESP32-S3 adaptation of Espressif's PrBoom port",
+  "license": "GPL-2.0-only",
+  "build": {
+    "flags": [
+      "-I include",
+      "-Wno-char-subscripts",
+      "-Wno-unused-value",
+      "-Wno-parentheses",
+      "-Wno-pointer-sign",
+      "-Wno-unused-but-set-parameter",
+      "-Wno-maybe-uninitialized"
+    ]
+  },
+  "frameworks": "arduino",
+  "platforms": "espressif32"
+}

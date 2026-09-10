@@ -1,6 +1,6 @@
 # Current status
 
-Updated: 2026-09-09
+Updated: 2026-09-10
 
 ## Completed
 
@@ -138,3 +138,14 @@ Updated: 2026-09-09
 The main board, memory configuration and first external SPI assignment are now
 established. New modules remain gated on an explicit pin-map assignment,
 standalone diagnostic and physical observation before Bruce integration.
+
+## Doom (software integration)
+
+- PrBoom 2.5.0 is integrated as an Obsidia-only Bruce library.
+- A `Games -> DOOM` menu entry and CardKB controls are implemented.
+- Rendering is adapted to the ST7735 at 160x120 without aspect distortion.
+- `doom1-cut.wad` is stored in a dedicated internal-flash partition at
+  `0x600000`; microSD is not used by Doom.
+- The `OBSIDIA_V1` firmware build passes with the integrated engine.
+- Physical display and gameplay validation remain unconfirmed until the TFT
+  is connected and the firmware/WAD have been flashed to the board.
