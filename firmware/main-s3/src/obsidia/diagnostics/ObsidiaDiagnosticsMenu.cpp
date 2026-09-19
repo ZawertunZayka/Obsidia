@@ -4,10 +4,12 @@
 
 #include "core/display.h"
 #include "core/utils.h"
+#include "../services/ObsidiaRadioRuntime.hpp"
 
 obsidia::DiagnosticsModel obsidiaDiagnosticsModel;
 
 void ObsidiaDiagnosticsMenu::optionsMenu() {
+    obsidiaDiagnosticsModel.updateRadio(obsidia::radioRuntimeSnapshot());
     options.clear();
     for (const auto &entry : obsidiaDiagnosticsModel.entries()) {
         String line(entry.label);

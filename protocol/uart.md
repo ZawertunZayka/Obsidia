@@ -1,7 +1,9 @@
 # ObsidiaLink UART protocol
 
-Status: protocol version 1; codec/parser host tests pass, hardware transport is
-pending confirmed UART GPIO and physical loop testing.
+Status: protocol version 1; codec/parser host tests pass. The assigned physical
+link is ESP32-S3 `TX GPIO16 -> RX GPIO16` on the ESP32-WROOM and ESP32-S3
+`RX GPIO15 <- TX GPIO17` on the ESP32-WROOM at 115200 8N1. Physical PING is
+pending.
 
 ## Frame
 

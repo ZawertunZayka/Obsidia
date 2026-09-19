@@ -2,6 +2,14 @@
 
 Updated: 2026-09-19
 
+## Current plan position
+
+Stages 1-5 are complete. Stage 6 microSD remains blocked before CMD0 by the
+current card/socket path. At the user's direction, bring-up has resumed at
+**Stage 9: ESP32-S3 to ESP32-WROOM UART**. GPIO are assigned, all eight host
+test suites pass, and both firmware images build successfully. The first
+physical ObsidiaLink PING is pending wiring and USB access to both boards.
+
 ## Completed
 
 - Repository/Git audit: clean `main`, correct `origin`, initial history retained.

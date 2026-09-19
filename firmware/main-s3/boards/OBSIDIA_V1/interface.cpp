@@ -1,5 +1,6 @@
 #include "core/bus_HAL.h"
 #include "core/powerSave.h"
+#include "obsidia/services/ObsidiaRadioRuntime.hpp"
 #include <Wire.h>
 #include <interface.h>
 
@@ -150,6 +151,8 @@ void _setup_gpio() {
     }
     cardKbPresent = probeCardKb();
     Serial.printf("[OBSIDIA] CardKB 0x%02X: %s\n", kCardKbAddress, cardKbPresent ? "ready" : "not found");
+
+    obsidia::beginRadioRuntime();
 }
 
 void _post_setup_gpio() {
@@ -174,6 +177,7 @@ void _setBrightness(uint8_t brightval) {
 }
 
 void InputHandler() {
+    obsidia::pollRadioRuntime();
     static uint32_t lastPollMs = 0;
     static uint32_t lastProbeMs = 0;
     const uint32_t now = millis();

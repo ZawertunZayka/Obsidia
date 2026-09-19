@@ -37,7 +37,7 @@ for its MISO even though this display does not expose one.
 | IR RX | signal/power/ground | TBD | TBD | TBD | No receiver module identified |
 | CardKB controls | yellow SDA / white SCL / red power / black GND | GPIO40 / GPIO41 / 3V3 / GND | Conservative 3.3 V supply retained | I2C at 100 kHz, address 0x5F | Confirmed: ACK and physical key bytes received |
 | former buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | Previously passed; superseded by CardKB at user request |
-| Radio UART | TX/RX | TBD | 3.3 V domain | TBD | Unconfirmed |
+| Radio UART | TX/RX | GPIO16/GPIO15 | No power connection; common GND only | 3.3 V UART, 115200 8N1 | Assigned for ObsidiaLink; physical PING pending |
 | FPGA SPI | SCLK/MOSI/MISO/CS/IRQ | TBD | 3.3 V domain expected | TBD | Unconfirmed |
 | native USB | GPIO19/GPIO20 connector routing | GPIO19/GPIO20 | USB | USB | Confirmed by flash transport |
 
@@ -45,7 +45,7 @@ for its MISO even though this display does not expose one.
 
 | Function | Module pin | ESP32 DevKit pin/GPIO | Supply | Logic | Status |
 |---|---|---|---|---|---|
-| Master UART | RX/TX | TBD | 3.3 V domain | TBD | Unconfirmed |
+| Master UART | RX/TX | GPIO16/GPIO17 | No power connection; common GND only | 3.3 V UART, 115200 8N1 | Assigned for ObsidiaLink; physical PING pending |
 | RDM6300 | TX/RX if present | TBD | TBD | TBD | Unconfirmed |
 | CC1101 SPI | SCLK/MOSI/MISO/CS/GDO0/GDO2 | TBD | TBD | TBD | Unconfirmed |
 | NRF24 SPI | SCLK/MOSI/MISO/CSN/CE/IRQ | TBD | TBD | TBD | Unconfirmed |
