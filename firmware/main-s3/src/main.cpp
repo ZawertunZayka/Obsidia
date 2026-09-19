@@ -14,6 +14,10 @@
 #include <functional>
 #include <string>
 #include <vector>
+#ifdef OBSIDIA_V1
+#include <obsidia_doom.h>
+#include <Wire.h>
+#endif
 io_expander ioExpander;
 BruceConfig bruceConfig;
 BruceConfigPins bruceConfigPins;
@@ -467,6 +471,29 @@ void setup() {
         (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL)
     );
     Serial.flush();
+
+#ifdef OBSIDIA_V1
+    // DOOM is a dedicated one-shot boot mode. Entering it from the Games menu
+    // restarts the chip, then this path initializes only the display and
+    // CardKB. Bruce storage, networking and background tasks never start, so
+    // PrBoom gets an unfragmented internal heap. A later reset boots Bruce.
+    if (obsidia_doom_consume_boot_request()) {
+        Serial.println("[DOOM] dedicated boot mode");
+        bruceConfig.bright = 100;
+        bruceConfigPins.rotation = ROTATION;
+        pinMode(TFT_CS, OUTPUT);
+        digitalWrite(TFT_CS, HIGH);
+        pinMode(TFT_BL, OUTPUT);
+        digitalWrite(TFT_BL, TFT_BACKLIGHT_ON);
+        Wire.begin(SYS_I2C_SDA, SYS_I2C_SCL, 100000);
+        tft.init();
+        tft.setRotation(ROTATION);
+        tft.invertDisplay(false);
+        tft.fillScreen(TFT_BLACK);
+        obsidia_doom_start();
+        while (true) delay(1000);
+    }
+#endif
 
     RAM_LOG("setup-start");
 

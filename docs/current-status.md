@@ -1,6 +1,6 @@
 # Current status
 
-Updated: 2026-09-10
+Updated: 2026-09-19
 
 ## Completed
 
@@ -149,5 +149,8 @@ standalone diagnostic and physical observation before Bruce integration.
 - The `OBSIDIA_V1` firmware build passes with the integrated engine.
 - The Doom task stack is allocated from PSRAM so it does not depend on Bruce's
   fragmented internal heap after startup.
-- Physical display and gameplay validation remain unconfirmed until the TFT
-  is connected and the firmware/WAD have been flashed to the board.
+- Dedicated boot mode, display output and gameplay were physically confirmed.
+- The WAD is mapped once for the engine lifetime to prevent intermittent MMU
+  faults while the menu demo loads textures.
+- CardKB arrow keys receive short synthetic holds for practical turning and
+  movement; WASD retains the original momentary behavior.

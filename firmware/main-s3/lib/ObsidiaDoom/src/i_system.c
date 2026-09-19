@@ -175,6 +175,8 @@ typedef struct {
 } FileDesc;
 
 static FileDesc fds[32];
+static const uint8_t *wadMmapBase;
+static esp_partition_mmap_handle_t wadMmapHandle;
 
 int I_Open(const char *wad, int flags) {
 	int x=3;
@@ -182,6 +184,13 @@ int I_Open(const char *wad, int flags) {
 	if (strcmp(wad, "DOOM1.WAD")==0) {
 		fds[x].part=esp_partition_find_first((esp_partition_type_t)0x42, (esp_partition_subtype_t)0x06, "doomwad");
 		if (fds[x].part == NULL) return -1;
+		if (wadMmapBase == NULL) {
+			esp_err_t maperr = esp_partition_mmap(
+				fds[x].part, 0, fds[x].part->size, ESP_PARTITION_MMAP_DATA,
+				(const void **)&wadMmapBase, &wadMmapHandle
+			);
+			if (maperr != ESP_OK) return -1;
+		}
 		fds[x].offset=0;
 		fds[x].size=fds[x].part->size;
 	} else {
@@ -254,18 +263,27 @@ static void freeUnusedMmaps() {
 		if (mmapHandle[i].used==0 && mmapHandle[i].addr!=NULL) {
 			esp_partition_munmap(mmapHandle[i].handle);
 			mmapHandle[i].addr=NULL;
-			printf("Freeing handle %d\n", i);
 		}
 	}
 }
 
 void *I_Mmap(void *addr, size_t length, int prot, int flags, int ifd, off_t offset) {
+	// The 3 MiB WAD fits in the ESP32-S3 data-MMU window. Keep one mapping for
+	// its lifetime instead of mapping individual lumps. The legacy per-lump
+	// cache can unmap a shared MMU page while another texture still references
+	// it, producing intermittent Cache/MMU faults during rendering.
+	if (ifd >= 0 && ifd < 32 && fds[ifd].part != NULL && wadMmapBase != NULL) {
+		if (offset < 0 || (size_t)offset > fds[ifd].part->size ||
+		    length > fds[ifd].part->size - (size_t)offset) return NULL;
+		return (void *)(wadMmapBase + offset);
+	}
+
 	int i;
 	esp_err_t err;
 	void *retaddr=NULL;
 
 	for (i=0; i<NO_MMAP_HANDLES; i++) {
-		if (mmapHandle[i].offset==offset && mmapHandle[i].len==length) {
+		if (mmapHandle[i].addr!=NULL && mmapHandle[i].offset==offset && mmapHandle[i].len==length) {
 			mmapHandle[i].used++;
 			return mmapHandle[i].addr;
 		}
@@ -276,7 +294,8 @@ void *I_Mmap(void *addr, size_t length, int prot, int flags, int ifd, off_t offs
 	//lprintf(LO_INFO, "I_Mmap: mmaping offset %d size %d handle %d\n", (int)offset, (int)length, i);
 	err=esp_partition_mmap(fds[ifd].part, offset, length, ESP_PARTITION_MMAP_DATA, (const void**)&retaddr, &mmapHandle[i].handle);
 	if (err==ESP_ERR_NO_MEM) {
-		lprintf(LO_ERROR, "I_Mmap: No free address space. Cleaning up unused cached mmaps...\n");
+		// Do not log here. Newlib may lazily allocate a recursive stdio lock
+		// from internal RAM, which is intentionally tight while Doom runs.
 		freeUnusedMmaps();
 		err=esp_partition_mmap(fds[ifd].part, offset, length, ESP_PARTITION_MMAP_DATA, (const void**)&retaddr, &mmapHandle[i].handle);
 	}
@@ -295,6 +314,8 @@ void *I_Mmap(void *addr, size_t length, int prot, int flags, int ifd, off_t offs
 
 
 int I_Munmap(void *addr, size_t length) {
+	if (wadMmapBase != NULL && (const uint8_t *)addr >= wadMmapBase &&
+	    (const uint8_t *)addr < wadMmapBase + 0x300000) return 0;
 	int i;
 	for (i=0; i<NO_MMAP_HANDLES; i++) {
 		if (mmapHandle[i].addr==addr && mmapHandle[i].len==length) break;
@@ -333,4 +354,3 @@ char* I_FindFile(const char* wfname, const char* ext)
 void I_SetAffinityMask(void)
 {
 }
-

@@ -13,7 +13,7 @@ void GamesMenu::optionsMenu() {
                  displayError("DOOM WAD missing", true);
                  return;
              }
-             obsidia_doom_start();
+             obsidia_doom_request_boot();
          }},
     };
     addOptionToMainMenu();

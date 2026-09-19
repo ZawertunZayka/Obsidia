@@ -54,7 +54,6 @@
 #include "i_main.h"
 #include "m_argv.h"
 
-#include "rom/ets_sys.h"
 
 int cons_error_mask = -1-LO_INFO; /* all but LO_INFO when redir'd */
 int cons_output_mask = -1;        /* all output enabled */
@@ -65,13 +64,14 @@ int cons_output_mask = -1;        /* all output enabled */
 #define MAX_MESSAGE_SIZE 2048
 
 
-//Esp32 doesn't use the 2K-sized stack-allocated string but directly passes args to vprintf.
+// Bruce leaves very little internal RAM after startup. Newlib's vprintf
+// lazily allocates per-task stdio locks and aborts in the Doom task, so keep
+// the legacy engine logger allocation-free. Obsidia lifecycle/errors are
+// logged by the C++ adapter instead.
 #if 1
 int lprintf(OutputLevels pri, const char *s, ...) {
-  va_list v;
-  va_start(v,s);
-  vprintf(s,v);
-  va_end(v);
+  (void)pri;
+  (void)s;
   return 0;
 }
 #endif
