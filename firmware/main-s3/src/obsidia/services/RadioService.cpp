@@ -4,6 +4,36 @@ namespace obsidia {
 
 RadioService::RadioService(RadioTransport &transport) : transport_(transport) {}
 
+bool RadioService::request(
+    link::Command command,
+    const std::uint8_t *payload,
+    std::size_t payloadLength,
+    link::Frame &response,
+    std::uint32_t nowMs,
+    std::uint32_t timeoutMs
+) {
+    std::array<std::uint8_t, link::kMaxFrameSize> encoded{};
+    std::size_t encodedLength = 0;
+    if (!link::encode(command, payload, payloadLength, encoded.data(), encoded.size(), encodedLength) ||
+        !transport_.write(encoded.data(), encodedLength)) {
+        return false;
+    }
+
+    link::Parser parser;
+    link::ParseError parseError = link::ParseError::None;
+    const std::uint32_t startedAt = nowMs;
+    while (static_cast<std::uint32_t>(nowMs - startedAt) < timeoutMs) {
+        std::uint8_t byte = 0;
+        if (transport_.read(byte)) {
+            const auto event = parser.feed(byte, nowMs, response, parseError);
+            if (event == link::ParseEvent::FrameReady) return true;
+            if (event == link::ParseEvent::Error) return false;
+        }
+        ++nowMs;
+    }
+    return false;
+}
+
 bool RadioService::elapsed(std::uint32_t now, std::uint32_t since, std::uint32_t interval) {
     return static_cast<std::uint32_t>(now - since) >= interval;
 }

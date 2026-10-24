@@ -110,12 +110,38 @@ void testProtocolMismatchAndWriteFailure() {
     assert(brokenService.snapshot().error == obsidia::RadioService::Error::TransportWrite);
 }
 
+void testRemoteNrf24Request() {
+    MockTransport transport;
+    obsidia::RadioService service(transport);
+    service.begin(0);
+    completeDiscovery(transport, service, 1);
+
+    const std::uint8_t status[] = {
+        static_cast<std::uint8_t>(obsidia::link::Command::Nrf24Status),
+        obsidia::link::kProtocolVersion,
+        0x0e,
+        0x08,
+        0x02,
+        0x0f,
+    };
+    transport.inject(obsidia::link::Command::Data, status, sizeof(status));
+    obsidia::link::Frame response;
+    assert(service.request(
+        obsidia::link::Command::Nrf24Status, nullptr, 0, response, 10
+    ));
+    assert(response.command == obsidia::link::Command::Data);
+    assert(response.payloadLength == sizeof(status));
+    assert(response.payload[2] == 0x0e);
+    assert(response.payload[4] == 0x02);
+}
+
 } // namespace
 
 int main() {
     testDiscoveryAndHeartbeat();
     testTimeoutRetriesAndRecovery();
     testProtocolMismatchAndWriteFailure();
+    testRemoteNrf24Request();
     std::cout << "RadioService tests passed\n";
     return 0;
 }

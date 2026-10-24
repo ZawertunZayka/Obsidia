@@ -45,7 +45,10 @@ bool encode(
 
 bool isRequest(Command command) {
     return command == Command::Ping || command == Command::GetVersion ||
-           command == Command::GetStatus || command == Command::Reset;
+           command == Command::GetStatus || command == Command::Reset ||
+           command == Command::Nrf24Status || command == Command::Nrf24SetChannel ||
+           command == Command::Nrf24Rpd || command == Command::Nrf24Carrier ||
+           command == Command::Nrf24Stop;
 }
 
 bool isResponse(Command command) {

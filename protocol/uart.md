@@ -31,6 +31,11 @@ buffers and reject zero or oversized lengths.
 | `GET_VERSION` | `0x02` | master -> radio |
 | `GET_STATUS` | `0x03` | master -> radio |
 | `RESET` | `0x04` | master -> radio |
+| `NRF24_STATUS` | `0x10` | master -> radio |
+| `NRF24_SET_CHANNEL` | `0x11` | master -> radio, payload `[channel]` |
+| `NRF24_RPD` | `0x12` | master -> radio, payload `[channel]` |
+| `NRF24_CARRIER` | `0x13` | master -> radio, payload `[channel, power]` |
+| `NRF24_STOP` | `0x14` | master -> radio |
 | `ACK` | `0x80` | radio -> master |
 | `ERROR` | `0x81` | radio -> master |
 | `DATA` | `0x82` | radio -> master |
@@ -69,3 +74,14 @@ and re-runs version/status discovery when the peer restarts or stops responding.
 supported-bits]`. Bits 0..2 represent RDM6300, CC1101 and NRF24 respectively.
 A supported bit describes compiled capability; a ready bit is set only after the
 peripheral's standalone diagnostic has passed during the current boot.
+
+## Remote NRF24 operations
+
+The NRF24 is physically attached to the radio ESP32, so `OBSIDIA_V1` uses the
+following bounded commands instead of constructing Bruce's local RF24 SPI
+object. `NRF24_STATUS` returns `[request, version, STATUS, CONFIG, RF_CH,
+RF_SETUP]`; `NRF24_SET_CHANNEL` acknowledges a channel write; `NRF24_RPD`
+returns `[request, version, rpd]` after a bounded receive-power-detect sample;
+`NRF24_CARRIER` starts a bounded carrier at `[channel, power]`; and
+`NRF24_STOP` disables the carrier and restores idle configuration. Carrier
+operations are restricted to explicitly authorized laboratory testing.

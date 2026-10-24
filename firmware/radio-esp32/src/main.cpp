@@ -48,6 +48,10 @@ constexpr std::uint32_t kResetDelayMs = 100;
 constexpr std::uint8_t kStatusRdm6300 = 1U << 0U;
 constexpr std::uint8_t kStatusCc1101 = 1U << 1U;
 constexpr std::uint8_t kStatusNrf24 = 1U << 2U;
+constexpr std::uint8_t kNrf24Config = 0x00;
+constexpr std::uint8_t kNrf24RfChannel = 0x05;
+constexpr std::uint8_t kNrf24RfSetup = 0x06;
+constexpr std::uint8_t kNrf24Rpd = 0x09;
 
 HardwareSerial linkSerial(2);
 obsidia::link::Parser parser;
@@ -100,6 +104,11 @@ private:
 };
 
 SPIClass nrf24Spi(HSPI);
+ArduinoNrf24Bus nrf24Bus(nrf24Spi, OBSIDIA_NRF24_CSN_GPIO);
+bool nrf24Configured = false;
+
+void sendFrame(Command command, const std::uint8_t *payload, std::size_t payloadLength);
+void sendError(std::uint8_t requestCommand, ErrorCode error);
 
 void runNrf24Diagnostic() {
     if (OBSIDIA_NRF24_SCLK_GPIO < 0 || OBSIDIA_NRF24_MISO_GPIO < 0 ||
@@ -121,8 +130,8 @@ void runNrf24Diagnostic() {
     );
     delay(5);
 
-    ArduinoNrf24Bus bus(nrf24Spi, OBSIDIA_NRF24_CSN_GPIO);
-    const auto result = obsidia::radio::Nrf24Diagnostic(bus).run();
+    nrf24Configured = true;
+    const auto result = obsidia::radio::Nrf24Diagnostic(nrf24Bus).run();
     if (result.passed) {
         peripheralStatus |= kStatusNrf24;
         Serial.printf(
@@ -140,6 +149,106 @@ void runNrf24Diagnostic() {
             result.config,
             result.rfChannel
         );
+    }
+}
+
+void sendData(std::uint8_t request, const std::uint8_t *data, std::size_t length) {
+    std::array<std::uint8_t, obsidia::link::kMaxPayloadSize> payload{};
+    if (length + 2U > payload.size()) {
+        sendError(request, ErrorCode::InternalFailure);
+        return;
+    }
+    payload[0] = request;
+    payload[1] = obsidia::link::kProtocolVersion;
+    for (std::size_t i = 0; i < length; ++i) payload[i + 2U] = data[i];
+    sendFrame(Command::Data, payload.data(), length + 2U);
+}
+
+bool validNrf24Request(const Frame &frame) {
+    switch (frame.command) {
+    case Command::Nrf24Status:
+    case Command::Nrf24Stop:
+        return frame.payloadLength == 0;
+    case Command::Nrf24SetChannel:
+    case Command::Nrf24Rpd:
+        return frame.payloadLength == 1 && frame.payload[0] <= 125;
+    case Command::Nrf24Carrier:
+        return frame.payloadLength == 2 && frame.payload[0] <= 125 && frame.payload[1] <= 3;
+    default:
+        return frame.payloadLength == 0;
+    }
+}
+
+void handleNrf24Request(const Frame &frame) {
+    const auto request = static_cast<std::uint8_t>(frame.command);
+    if (!nrf24Configured || (peripheralStatus & kStatusNrf24) == 0U) {
+        sendError(request, ErrorCode::PeripheralUnavailable);
+        return;
+    }
+    if (frame.command == Command::Nrf24Status) {
+        std::uint8_t status = 0;
+        std::uint8_t config = 0;
+        std::uint8_t channel = 0;
+        std::uint8_t setup = 0;
+        if (!nrf24Bus.readStatus(status) || !nrf24Bus.readRegister(kNrf24Config, config) ||
+            !nrf24Bus.readRegister(kNrf24RfChannel, channel) ||
+            !nrf24Bus.readRegister(kNrf24RfSetup, setup)) {
+            sendError(request, ErrorCode::InternalFailure);
+            return;
+        }
+        const std::uint8_t data[] = {status, config, channel, setup};
+        sendData(request, data, sizeof(data));
+        return;
+    }
+    if (frame.command == Command::Nrf24SetChannel) {
+        if (!nrf24Bus.writeRegister(kNrf24RfChannel, frame.payload[0])) {
+            sendError(request, ErrorCode::InternalFailure);
+            return;
+        }
+        const std::uint8_t ack[] = {request, obsidia::link::kProtocolVersion};
+        sendFrame(Command::Ack, ack, sizeof(ack));
+        return;
+    }
+    if (frame.command == Command::Nrf24Rpd) {
+        digitalWrite(OBSIDIA_NRF24_CE_GPIO, LOW);
+        if (!nrf24Bus.writeRegister(kNrf24Config, 0x03U) ||
+            !nrf24Bus.writeRegister(kNrf24RfChannel, frame.payload[0])) {
+            sendError(request, ErrorCode::InternalFailure);
+            return;
+        }
+        digitalWrite(OBSIDIA_NRF24_CE_GPIO, HIGH);
+        delayMicroseconds(140);
+        std::uint8_t rpd = 0;
+        const bool ok = nrf24Bus.readRegister(kNrf24Rpd, rpd);
+        digitalWrite(OBSIDIA_NRF24_CE_GPIO, LOW);
+        nrf24Bus.writeRegister(kNrf24Config, 0x08U);
+        if (!ok) {
+            sendError(request, ErrorCode::InternalFailure);
+            return;
+        }
+        sendData(request, &rpd, 1);
+        return;
+    }
+    if (frame.command == Command::Nrf24Carrier) {
+        const std::uint8_t rfPower = static_cast<std::uint8_t>(0x80U | 0x10U |
+            static_cast<std::uint8_t>((frame.payload[1] & 0x03U) << 1U));
+        if (!nrf24Bus.writeRegister(kNrf24RfChannel, frame.payload[0]) ||
+            !nrf24Bus.writeRegister(kNrf24RfSetup, rfPower) ||
+            !nrf24Bus.writeRegister(kNrf24Config, 0x0AU)) {
+            sendError(request, ErrorCode::InternalFailure);
+            return;
+        }
+        digitalWrite(OBSIDIA_NRF24_CE_GPIO, HIGH);
+        const std::uint8_t ack[] = {request, obsidia::link::kProtocolVersion};
+        sendFrame(Command::Ack, ack, sizeof(ack));
+        return;
+    }
+    if (frame.command == Command::Nrf24Stop) {
+        digitalWrite(OBSIDIA_NRF24_CE_GPIO, LOW);
+        nrf24Bus.writeRegister(kNrf24Config, 0x08U);
+        nrf24Bus.writeRegister(kNrf24RfSetup, 0x0FU);
+        const std::uint8_t ack[] = {request, obsidia::link::kProtocolVersion};
+        sendFrame(Command::Ack, ack, sizeof(ack));
     }
 }
 
@@ -175,8 +284,15 @@ void handleRequest(const Frame &frame) {
         sendError(request, ErrorCode::UnsupportedCommand);
         return;
     }
-    if (frame.payloadLength != 0) {
+    if (!validNrf24Request(frame)) {
         sendError(request, ErrorCode::InvalidPayload);
+        return;
+    }
+
+    const auto commandValue = static_cast<std::uint8_t>(frame.command);
+    if (commandValue >= static_cast<std::uint8_t>(Command::Nrf24Status) &&
+        commandValue <= static_cast<std::uint8_t>(Command::Nrf24Stop)) {
+        handleNrf24Request(frame);
         return;
     }
 

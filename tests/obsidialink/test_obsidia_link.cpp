@@ -140,6 +140,9 @@ void testBoundsAndCommandClasses() {
     assert(!encode(Command::Ping, nullptr, 1, output.data(), output.size(), length));
     assert(!encode(Command::Ping, nullptr, 0, output.data(), 4, length));
     assert(isRequest(Command::Reset));
+    assert(isRequest(Command::Nrf24Status));
+    assert(isRequest(Command::Nrf24Rpd));
+    assert(isRequest(Command::Nrf24Carrier));
     assert(!isRequest(Command::Data));
     assert(isResponse(Command::Error));
     assert(errorCodeFor(ParseError::BadCrc) == ErrorCode::BadCrc);

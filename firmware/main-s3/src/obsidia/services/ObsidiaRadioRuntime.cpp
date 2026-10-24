@@ -80,6 +80,60 @@ const RadioService::Snapshot &radioRuntimeSnapshot() {
     return radioService.snapshot();
 }
 
+namespace {
+bool remoteRequest(
+    link::Command command,
+    const std::uint8_t *payload,
+    std::size_t payloadLength,
+    link::Frame &response
+) {
+    return started && radioService.snapshot().health == RadioService::Health::Ready &&
+           radioService.request(command, payload, payloadLength, response, millis());
+}
+}
+
+bool remoteNrf24Status(RemoteNrf24Status &status) {
+    link::Frame response;
+    if (!remoteRequest(link::Command::Nrf24Status, nullptr, 0, response) ||
+        response.command != link::Command::Data || response.payloadLength != 6 ||
+        response.payload[0] != static_cast<std::uint8_t>(link::Command::Nrf24Status) ||
+        response.payload[1] != link::kProtocolVersion) return false;
+    status.status = response.payload[2];
+    status.config = response.payload[3];
+    status.rfChannel = response.payload[4];
+    status.rfSetup = response.payload[5];
+    return true;
+}
+
+bool remoteNrf24SetChannel(std::uint8_t channel) {
+    const std::uint8_t payload[] = {channel};
+    link::Frame response;
+    return remoteRequest(link::Command::Nrf24SetChannel, payload, sizeof(payload), response) &&
+           response.command == link::Command::Ack && response.payloadLength == 2;
+}
+
+bool remoteNrf24ReadRpd(std::uint8_t channel, std::uint8_t &rpd) {
+    const std::uint8_t payload[] = {channel};
+    link::Frame response;
+    if (!remoteRequest(link::Command::Nrf24Rpd, payload, sizeof(payload), response) ||
+        response.command != link::Command::Data || response.payloadLength != 3) return false;
+    rpd = response.payload[2];
+    return true;
+}
+
+bool remoteNrf24StartCarrier(std::uint8_t channel, std::uint8_t power) {
+    const std::uint8_t payload[] = {channel, power};
+    link::Frame response;
+    return remoteRequest(link::Command::Nrf24Carrier, payload, sizeof(payload), response) &&
+           response.command == link::Command::Ack && response.payloadLength == 2;
+}
+
+bool remoteNrf24Stop() {
+    link::Frame response;
+    return remoteRequest(link::Command::Nrf24Stop, nullptr, 0, response) &&
+           response.command == link::Command::Ack && response.payloadLength == 2;
+}
+
 } // namespace obsidia
 
 #endif

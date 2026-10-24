@@ -45,6 +45,15 @@ public:
     void poll(std::uint32_t nowMs);
     const Snapshot &snapshot() const { return snapshot_; }
 
+    bool request(
+        link::Command command,
+        const std::uint8_t *payload,
+        std::size_t payloadLength,
+        link::Frame &response,
+        std::uint32_t nowMs,
+        std::uint32_t timeoutMs = 500
+    );
+
 private:
     enum class Phase : std::uint8_t { Idle, Ping, Version, Status };
 

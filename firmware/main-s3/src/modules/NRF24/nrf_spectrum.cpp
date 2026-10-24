@@ -1,13 +1,43 @@
 #include "nrf_spectrum.h"
 #include "core/display.h"
 #include "core/mykeyboard.h"
+#ifdef OBSIDIA_V1
+#include "obsidia/services/ObsidiaRadioRuntime.hpp"
+#endif
 
 #define CHANNELS 80
+#define _BW tftWidth / CHANNELS
 #define RGB565(r, g, b) ((((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3)))
 uint8_t channel[CHANNELS];
 
+#ifdef OBSIDIA_V1
+static void scanRemoteChannels() {
+    uint8_t rpdValues[CHANNELS] = {0};
+    for (int i = 0; i < CHANNELS; ++i) {
+        std::uint8_t rpd = 0;
+        if (!obsidia::remoteNrf24ReadRpd(static_cast<std::uint8_t>(i), rpd)) {
+            displayError("Remote NRF24 link error", true);
+            return;
+        }
+        channel[i] = static_cast<uint8_t>((channel[i] * 3U + (rpd ? 125U : 0U)) / 4U);
+        rpdValues[i] = channel[i];
+    }
+
+    for (int i = 0; i < CHANNELS; ++i) {
+        int level = rpdValues[i];
+        int x = i * _BW;
+        int c = i;
+        tft.drawFastVLine(
+            x, tftHeight - (10 + level), level, (i % 2 == 0) ? bruceConfig.priColor : TFT_DARKGREY
+        );
+        tft.drawFastVLine(x, 0, tftHeight - (9 + level), (i % 8) ? TFT_BLACK : RGB565(25, 25, 25));
+        tft.drawFastVLine(x, 0, level, bruceConfig.secColor);
+        if (c % 5 == 0 && c != 0) tft.drawCentreString(String(c).c_str(), x, tftHeight / 2, 1);
+    }
+}
+#endif
+
 // scanning channels
-#define _BW tftWidth / CHANNELS
 String scanChannels(bool web) {
     String result = "{";
 
@@ -61,6 +91,22 @@ void nrf_spectrum() {
     tft.drawCentreString("2.44Ghz", tftWidth / 2, tftHeight - LH, 1);
     tft.drawRightString("2.48Ghz", tftWidth, tftHeight - LH, 1);
 
+#ifdef OBSIDIA_V1
+    const auto &radio = obsidia::radioRuntimeSnapshot();
+    if (radio.health != obsidia::RadioService::Health::Ready ||
+        (radio.readyMask & (1U << 2U)) == 0U) {
+        displayError("Remote NRF24 not ready", true);
+        return;
+    }
+    drawMainBorderWithTitle("NRF SPECTRUM", false);
+    printSubtitle("Remote NRF24 via ObsidiaLink");
+    while (!check(EscPress)) {
+        scanRemoteChannels();
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+    obsidia::remoteNrf24Stop();
+    return;
+#else
     if (nrf_start(NRF_MODE_SPI)) { // This function only works on SPI
         NRFradio.setAutoAck(false);
         NRFradio.disableCRC();       // accept any signal we find
@@ -91,4 +137,5 @@ void nrf_spectrum() {
         delay(500);
         return;
     }
+#endif
 }
