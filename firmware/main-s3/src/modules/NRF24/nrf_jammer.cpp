@@ -3,6 +3,9 @@
 #include "core/mykeyboard.h"
 #include "nrf_common.h"
 #include <globals.h>
+#ifdef OBSIDIA_V1
+#include "obsidia/services/ObsidiaRadioRuntime.hpp"
+#endif
 
 static void shuffleChannels(uint8_t *arr, size_t count) {
     for (size_t i = count - 1; i > 0; i--) {
@@ -84,6 +87,76 @@ void nrf_jammer() {
         {"Zigbee      ", zigbee_channels,    sizeof(zigbee_channels) / sizeof(zigbee_channels[0])      },
         {"Full        ", full_channels,      sizeof(full_channels) / sizeof(full_channels[0])          }
     };
+
+#ifdef OBSIDIA_V1
+    const auto &remoteRadio = obsidia::radioRuntimeSnapshot();
+    if (remoteRadio.health != obsidia::RadioService::Health::Ready ||
+        (remoteRadio.readyMask & (1U << 2U)) == 0U) {
+        displayError("Remote NRF24 not ready", true);
+        return;
+    }
+
+    int remoteModeIndex = 0;
+    int remoteHopIndex = 0;
+    bool remoteRedraw = true;
+    bool remoteShuffle = false;
+    uint8_t remoteShuffled[124]{};
+    while (!check(EscPress)) {
+        if (remoteHopIndex >= static_cast<int>(modes[remoteModeIndex].count)) {
+            remoteHopIndex = 0;
+            remoteShuffle = true;
+        }
+        if (remoteShuffle) {
+            for (size_t i = 0; i < modes[remoteModeIndex].count; ++i) {
+                remoteShuffled[i] = static_cast<uint8_t>(i);
+            }
+            shuffleChannels(remoteShuffled, modes[remoteModeIndex].count);
+            remoteShuffle = false;
+        }
+        const uint8_t channelIndex = remoteShuffled[remoteHopIndex];
+        const uint8_t rfChannel = modes[remoteModeIndex].channels[channelIndex];
+        if (!obsidia::remoteNrf24StartCarrier(rfChannel, 3)) {
+            displayError("Remote NRF24 carrier error", true);
+            break;
+        }
+        if (remoteRedraw) {
+            drawMainBorderWithTitle("NRF JAMMER", false);
+            printSubtitle("Remote NRF24 via ObsidiaLink");
+            padprintln("STATUS : READY");
+            padprintln("MODE : " + String(modes[remoteModeIndex].name));
+            padprintln("CH   : " + String(rfChannel));
+            padprintln("HOP  : " + String(hopping_mode == 0 ? "Sequential" : "FHSS"));
+            padprintln("");
+            padprintln("> Switch Mode: Next/Prev");
+            padprintln("> Hop Mode: Sel");
+            padprintln("> Exit: Esc");
+            remoteRedraw = false;
+        }
+        ++remoteHopIndex;
+        if (check(NextPress)) {
+            remoteModeIndex = (remoteModeIndex + 1) % (sizeof(modes) / sizeof(modes[0]));
+            remoteHopIndex = 0;
+            remoteShuffle = true;
+            remoteRedraw = true;
+        }
+        if (check(PrevPress)) {
+            remoteModeIndex--;
+            if (remoteModeIndex < 0) remoteModeIndex = (sizeof(modes) / sizeof(modes[0])) - 1;
+            remoteHopIndex = 0;
+            remoteShuffle = true;
+            remoteRedraw = true;
+        }
+        if (check(SelPress)) {
+            hopping_mode = hopping_mode == 0 ? 1 : 0;
+            remoteHopIndex = 0;
+            remoteShuffle = true;
+            remoteRedraw = true;
+        }
+        vTaskDelay(pdMS_TO_TICKS(1));
+    }
+    obsidia::remoteNrf24Stop();
+    return;
+#endif
 
     if (nrf_start(mode)) {
 

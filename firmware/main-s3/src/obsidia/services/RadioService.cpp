@@ -29,6 +29,7 @@ bool RadioService::request(
             if (event == link::ParseEvent::FrameReady) return true;
             if (event == link::ParseEvent::Error) return false;
         }
+        transport_.idle();
         ++nowMs;
     }
     return false;

@@ -13,6 +13,9 @@ public:
     virtual ~RadioTransport() = default;
     virtual bool write(const std::uint8_t *data, std::size_t length) = 0;
     virtual bool read(std::uint8_t &byte) = 0;
+    // Gives asynchronous transports a chance to yield while a synchronous
+    // request waits for its response. Host transports may leave this empty.
+    virtual void idle() {}
 };
 
 class RadioService {

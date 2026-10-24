@@ -14,6 +14,10 @@ bool ArduinoRadioTransport::read(std::uint8_t &byte) {
     return true;
 }
 
+void ArduinoRadioTransport::idle() {
+    delay(1);
+}
+
 ArduinoFpgaTransport::ArduinoFpgaTransport(
     SPIClass &spi,
     int chipSelectGpio,

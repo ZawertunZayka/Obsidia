@@ -14,6 +14,7 @@ public:
 
     bool write(const std::uint8_t *data, std::size_t length) override;
     bool read(std::uint8_t &byte) override;
+    void idle() override;
 
 private:
     Stream &stream_;
