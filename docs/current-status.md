@@ -5,10 +5,10 @@ Updated: 2026-09-19
 ## Current plan position
 
 Stages 1-5 are complete. Stage 6 microSD remains blocked before CMD0 by the
-current card/socket path. At the user's direction, bring-up has resumed at
-**Stage 9: ESP32-S3 to ESP32-WROOM UART**. GPIO are assigned, all eight host
-test suites pass, and both firmware images build successfully. The first
-physical ObsidiaLink PING is pending wiring and USB access to both boards.
+current card/socket path. At the user's direction, bring-up resumed at
+**Stage 9: ESP32-S3 to ESP32-WROOM UART**. The physical ObsidiaLink discovery
+sequence now passes in both directions; Stage 9 is complete and Stage 10
+protocol hardening is active.
 
 ## Completed
 
@@ -39,6 +39,10 @@ physical ObsidiaLink PING is pending wiring and USB access to both boards.
   no RF operation is enabled and all GPIO remain unset.
 - NRF24L01+ standalone diagnostic validates STATUS/register reserved bits and a
   reversible RF_CH write with CE held low; it performs no receive/transmit work.
+  For the photographed HW-394 radio ESP32 DevKit, diagnostic pins are now
+  assigned as SCK=18, MISO=19, MOSI=23, CSN=21, CE=22 (IRQ unused). The
+  diagnostic builds successfully; no radio ESP32 serial port was available for
+  flashing and no physical register response has been observed yet.
 - ESP32-S3 board-identity firmware is prepared in safe/no-PSRAM and N16R8 probe
   variants; both compile and use no peripheral GPIO.
 - ST7735 VER 1.0 module identified from front/back photos. Its 3.3 V-only raw
@@ -93,6 +97,11 @@ physical ObsidiaLink PING is pending wiring and USB access to both boards.
   prepared; an IR receiver has not yet been identified.
 - Arduino `Stream`/`SPIClass` adapters connect those services to Bruce buses
   while rejecting unset CS/frequency and retaining board-owned pin selection.
+- The ESP32-S3 and ESP32-WROOM are connected by the assigned 115200 8N1 UART.
+  Physical logs show repeated `PING`, `GET_VERSION` and `GET_STATUS` requests,
+  bounded `ACK`/`DATA` replies, protocol v1, radio firmware 0.1.0 and supported
+  mask `0x07`. Bruce automatically rediscovers the coprocessor and reports link
+  state transitions without flooding the CardKB input task.
 - FPGA SPI mode 0 slave, base `OBSD` register map, IRQ aggregation and bounded
   dual-clock FIFO implemented without pin constraints.
 
@@ -104,7 +113,7 @@ physical ObsidiaLink PING is pending wiring and USB access to both boards.
 | Bruce analysis | pass | host | Local source files inspected; archive is not Git |
 | Bruce control build | pass | build | PlatformIO success; 3,701,374 B flash, 128,320 B RAM |
 | ObsidiaLink codec/parser | pass | host | CRC vector, framing, bounds, timeout, error mapping and resynchronization tests pass |
-| Radio MCU firmware | pass | build | PlatformIO `obsidia-radio` success; 289,780 B flash, 22,244 B RAM; malformed input returns protocol errors |
+| Radio MCU firmware | pass | build/connected | PlatformIO `obsidia-radio` success; 291,460 B flash, 22,308 B RAM; physical request/response logs observed |
 | Main RadioService | pass | host/build | State-machine tests pass and complete Bruce control build succeeds |
 | Main FpgaService | pass | host/build | Recovery/FIFO/control tests pass and complete Bruce control build succeeds |
 | Diagnostics model | pass | host/build | Inventory/mapping/bounds tests pass; S3 object compiles |
@@ -114,10 +123,10 @@ physical ObsidiaLink PING is pending wiring and USB access to both boards.
 | CC1101 diagnostic | pass | host/build | Failure paths and register restoration tested; ESP32 build succeeds |
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
-| NRF24 hardware | pending wiring/power | none | GPIO unset; PA/LNA supply and decoupling unverified |
+| NRF24 hardware | pending physical test | build only | Assigned GPIO18/19/23/21/22; diagnostic builds; PA/LNA register response not yet observed |
 | S3 identity diagnostic | pass | connected | N16R8 image flashed; 16 MB QIO/80 MHz flash and initialized 8 MB PSRAM reported |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
-| Radio UART transport | pending hardware | none | GPIO deliberately unset until board and wiring confirmation |
+| Radio UART transport | pass | connected | Repeated PING/ACK, version 0.1.0 and status 0x00/0x07 observed in both MCU logs |
 | FPGA base register RTL | pass | simulation | Icarus testbench, Yosys structural check and Verilator lint pass |
 | FPGA IRQ RTL | pass | simulation | Pending/status/IRQ consistency and acknowledgement toggle tested |
 | FPGA FIFO RTL | pass | simulation | CDC, ordered burst reads, clear, full/empty and overflow rejection tested |

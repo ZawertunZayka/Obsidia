@@ -27,6 +27,13 @@ would detach it from the Arduino-ESP32 3.x peripheral manager. The retained
 result records the GPIO level both before and after matrix attachment because
 an unconnected MISO loses the internal pull-up when SPI takes ownership.
 
+If SPI mounting and raw CMD0 both fail, the diagnostic releases the SPI bus and
+tries the ESP32-S3 native SDMMC host in 1-bit mode on the same physical card
+signals: CLK=GPIO12, CMD=GPIO11 and D0=GPIO13, with D3/CS pulled high. This is a
+differential electrical test, not a proposed Bruce storage backend. A failure
+in both independent controllers places the fault after the ESP32 GPIO/header
+connection: card seating, socket contacts, breakout traces or the card itself.
+
 The ST7735 chip-select is held high because the display shares SCK/MOSI with the
 local SPI bus. A physical pass requires the final serial marker
 `[RESULT] PASS SD_STRESS_100 create/write/read/verify/delete`. The result or a

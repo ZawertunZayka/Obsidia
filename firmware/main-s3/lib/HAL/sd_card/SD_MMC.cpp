@@ -19,7 +19,6 @@
 #if SOC_SDMMC_IO_POWER_EXTERNAL
 #include "sd_pwr_ctrl_by_on_chip_ldo.h"
 #endif
-
 using namespace fs;
 
 SDFS::SDFS(FSImplPtr impl) : FS(impl), _card(nullptr) {

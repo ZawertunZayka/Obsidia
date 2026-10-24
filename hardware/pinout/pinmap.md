@@ -17,7 +17,7 @@ a working QinHeng USB-UART bridge. These board-owned signals are reserved:
 | GPIO19 / USB D- | Native USB connector | Confirmed by native USB Serial/JTAG flashing |
 | GPIO20 / USB D+ | Native USB connector | Confirmed by native USB Serial/JTAG flashing |
 | GPIO0 | BOOT strap/button | Visible on carrier; reserve from peripherals |
-| GPIO3, GPIO45, GPIO46 | Strapping pins | Reserve until boot-level requirements are reviewed |
+| GPIO3, GPIO45, GPIO46 | Strapping pins | GPIO3/46 accepted by user for SD MOSI/MISO after explicit boot-risk review; GPIO45 remains reserved |
 | GPIO48 | Onboard RGB candidate | Visible beside RGB circuit; electrical mapping untested |
 | GPIO35, GPIO36, GPIO37 | N16R8 octal PSRAM signals | Do not use as GPIO on this module configuration |
 
@@ -31,13 +31,13 @@ for its MISO even though this display does not expose one.
 |---|---|---|---|---|---|
 | ST7735 SPI | SCK/SDA/CS/DC/RES/BL | GPIO12/GPIO11/GPIO10/GPIO9/GPIO14/GPIO21 | 3.3 V | 3.3 V | Confirmed: final diagnostic screen visible |
 | Shared local SPI | MISO | GPIO13 | 3.3 V | 3.3 V | Reserved for later SD/PN532 use |
-| microSD SPI (passive 8-pin breakout) | CLK/CMD-MOSI/DO-MISO/DO3-CS | GPIO12/GPIO11/GPIO13/GPIO8 | 3.3 V only | Native 3.3 V card bus | Assigned from photos; physical stress test pending |
+| microSD dedicated SPI (passive 8-pin breakout) | CLK/CMD-MOSI/DO-MISO/DO3-CS | GPIO18/GPIO3/GPIO46/GPIO17 | 3.3 V only | Native 3.3 V card bus | User-confirmed wiring; GPIO3/46 strapping risk accepted; physical diagnostic pending |
 | PN532 | interface pins | TBD | TBD | TBD | Unconfirmed |
-| IR TX (KY-005 type) | S / middle resistor-ground / `-` | GPIO17 / GND / NC | GPIO output through fitted 100 ohm resistor | 3.3 V GPIO | Assigned from photographed module; physical test pending |
+| IR TX (KY-005 type) | S / middle resistor-ground / `-` | TBD / GND / NC | GPIO output through fitted 100 ohm resistor | 3.3 V GPIO | Temporarily disabled because GPIO17 is now microSD CS |
 | IR RX | signal/power/ground | TBD | TBD | TBD | No receiver module identified |
 | CardKB controls | yellow SDA / white SCL / red power / black GND | GPIO40 / GPIO41 / 3V3 / GND | Conservative 3.3 V supply retained | I2C at 100 kHz, address 0x5F | Confirmed: ACK and physical key bytes received |
-| former buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | Previously passed; superseded by CardKB at user request |
-| Radio UART | TX/RX | GPIO16/GPIO15 | No power connection; common GND only | 3.3 V UART, 115200 8N1 | Assigned for ObsidiaLink; physical PING pending |
+| former buttons 4x2 | K1/K2/K3/K4/K5/K6/K7/K8/G | GPIO16/GPIO15/GPIO7/GPIO6/GPIO5/GPIO4/GPIO2/GPIO1/GND | Passive; no VCC | 3.3 V pull-ups | Superseded by CardKB |
+| Radio UART | TX/RX | GPIO16/GPIO15 | No power connection; common GND only | 3.3 V UART, 115200 8N1 | Confirmed: bidirectional discovery and heartbeat pass |
 | FPGA SPI | SCLK/MOSI/MISO/CS/IRQ | TBD | 3.3 V domain expected | TBD | Unconfirmed |
 | native USB | GPIO19/GPIO20 connector routing | GPIO19/GPIO20 | USB | USB | Confirmed by flash transport |
 
@@ -45,10 +45,10 @@ for its MISO even though this display does not expose one.
 
 | Function | Module pin | ESP32 DevKit pin/GPIO | Supply | Logic | Status |
 |---|---|---|---|---|---|
-| Master UART | RX/TX | GPIO16/GPIO17 | No power connection; common GND only | 3.3 V UART, 115200 8N1 | Assigned for ObsidiaLink; physical PING pending |
+| Master UART | RX/TX | GPIO16/GPIO17 | No power connection; common GND only | 3.3 V UART, 115200 8N1 | Confirmed: PING/version/status RX and ACK/DATA TX pass |
 | RDM6300 | TX/RX if present | TBD | TBD | TBD | Unconfirmed |
 | CC1101 SPI | SCLK/MOSI/MISO/CS/GDO0/GDO2 | TBD | TBD | TBD | Unconfirmed |
-| NRF24 SPI | SCLK/MOSI/MISO/CSN/CE/IRQ | TBD | TBD | TBD | Unconfirmed |
+| NRF24L01+ PA/LNA | SCK/MISO/MOSI/CSN/CE/IRQ | GPIO18/GPIO19/GPIO23/GPIO21/GPIO22/NC | External regulated 3.3 V, >=250 mA; common GND | 3.3 V | Assigned from photographed HW-394 labels; standalone diagnostic pending |
 
 ## FPGA
 

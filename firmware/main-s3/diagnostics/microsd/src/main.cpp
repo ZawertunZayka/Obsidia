@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <FS.h>
 #include <SD.h>
+#include <SD_MMC.h>
 #include <SPI.h>
 
 #include <array>
@@ -128,6 +129,34 @@ bool mountCard() {
     return false;
 }
 
+bool mountCardSdMmc1Bit() {
+    SD.end();
+    SPI.end();
+
+    // In 1-bit SD mode D3 is not a data line, but it must remain pulled high.
+    // The passive breakout already has an external pull-up; retain the ESP32
+    // pull-up as a harmless second source while the SDMMC peripheral owns
+    // CLK/CMD/D0.
+    pinMode(kPinSdCs, INPUT_PULLUP);
+    delay(20);
+
+    logLine("[SDMMC] fallback mode=1-bit CLK=12 CMD=11 D0=13 D3=pull-up");
+    if (!SD_MMC.setPins(kPinSck, kPinMosi, kPinMiso)) {
+        logLine("[SDMMC] setPins=FAIL");
+        return false;
+    }
+    const bool mounted = SD_MMC.begin("/sdmmc", true, false, 400, 5);
+    Serial0.printf("[SDMMC] mount=%s type=%u size=%llu MiB\n",
+                   mounted ? "OK" : "FAIL",
+                   mounted ? static_cast<unsigned>(SD_MMC.cardType()) : 0U,
+                   mounted ? SD_MMC.cardSize() / (1024ULL * 1024ULL) : 0ULL);
+    Serial.printf("[SDMMC] mount=%s type=%u size=%llu MiB\n",
+                  mounted ? "OK" : "FAIL",
+                  mounted ? static_cast<unsigned>(SD_MMC.cardType()) : 0U,
+                  mounted ? SD_MMC.cardSize() / (1024ULL * 1024ULL) : 0ULL);
+    return mounted;
+}
+
 bool runCycle(std::uint16_t cycle) {
     char path[32];
     snprintf(path, sizeof(path), "/.obsidia_sd_%03u.bin", cycle);
@@ -204,13 +233,16 @@ void setup() {
     rawProbeResult = runRawProbe(gpioBeforeSpi);
 
     if (!mountCard()) {
+        const bool sdMmcMounted = mountCardSdMmc1Bit();
         snprintf(resultBuffer.data(), resultBuffer.size(),
-                 "[RESULT] FAIL SD_MOUNT gpio=%u/%u idle=%02X CMD0=%02X CMD8=%02X echo=%02X%02X%02X%02X",
+                 "[RESULT] FAIL SPI_MOUNT SDMMC_1BIT=%s gpio=%u/%u idle=%02X CMD0=%02X CMD8=%02X echo=%02X%02X%02X%02X",
+                 sdMmcMounted ? "OK" : "FAIL",
                  rawProbeResult.gpioBeforeSpi, rawProbeResult.gpioAfterSpi,
                  rawProbeResult.idleMiso, rawProbeResult.cmd0, rawProbeResult.cmd8,
                  rawProbeResult.cmd8Data[0], rawProbeResult.cmd8Data[1],
                  rawProbeResult.cmd8Data[2], rawProbeResult.cmd8Data[3]);
         logLine(resultBuffer.data());
+        if (sdMmcMounted) SD_MMC.end();
         completed = true;
         return;
     }

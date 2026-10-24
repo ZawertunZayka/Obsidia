@@ -21,6 +21,9 @@ HardwareSerial radioSerial(1);
 ArduinoRadioTransport radioTransport(radioSerial);
 RadioService radioService(radioTransport);
 bool started = false;
+std::uint32_t reportedDiscoveries = 0;
+bool failureReported = false;
+bool readyReported = false;
 
 } // namespace
 
@@ -42,7 +45,35 @@ void beginRadioRuntime() {
 }
 
 void pollRadioRuntime() {
-    if (started) radioService.poll(millis());
+    if (!started) return;
+    radioService.poll(millis());
+    const auto &snapshot = radioService.snapshot();
+    if (snapshot.successfulDiscoveries != reportedDiscoveries) {
+        reportedDiscoveries = snapshot.successfulDiscoveries;
+        failureReported = false;
+    }
+    if (snapshot.successfulDiscoveries != 0 && !readyReported) {
+        readyReported = true;
+        Serial.printf(
+            "[OBSIDIA][RADIO][OK] PING ACK; link=v%u firmware=%u.%u.%u status=0x%02X/0x%02X discoveries=%u\n",
+            static_cast<unsigned>(snapshot.protocolVersion),
+            static_cast<unsigned>(snapshot.firmwareVersion[0]),
+            static_cast<unsigned>(snapshot.firmwareVersion[1]),
+            static_cast<unsigned>(snapshot.firmwareVersion[2]),
+            static_cast<unsigned>(snapshot.readyMask),
+            static_cast<unsigned>(snapshot.supportedMask),
+            static_cast<unsigned>(snapshot.successfulDiscoveries)
+        );
+    }
+    if (snapshot.linkFailures != 0 && !failureReported) {
+        failureReported = true;
+        readyReported = false;
+        Serial.printf(
+            "[OBSIDIA][RADIO][ERROR] link failure=%u count=%u; rediscovery active\n",
+            static_cast<unsigned>(snapshot.error),
+            static_cast<unsigned>(snapshot.linkFailures)
+        );
+    }
 }
 
 const RadioService::Snapshot &radioRuntimeSnapshot() {

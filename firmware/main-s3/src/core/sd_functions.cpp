@@ -21,6 +21,9 @@
 #include <MD5Builder.h>
 #include <algorithm> // for std::sort
 #include <esp_rom_crc.h>
+#ifdef OBSIDIA_V1
+#include <sys/stat.h>
+#endif
 
 // SPIClass sdcardSPI;
 String fileToCopy;
@@ -64,6 +67,35 @@ static uint8_t obsidiaProbeSdCmd0(SPIClass &bus, int8_t csPin) {
         responseOffset
     );
     return response;
+}
+
+void obsidiaLogSdState(const char *stage) {
+    const sdcard_type_t type = SD.cardType();
+    const uint64_t cardSize = SD.cardSize();
+    const bool rootExists = SD.exists("/");
+    File root = SD.open("/", FILE_READ);
+    const bool rootOpen = static_cast<bool>(root);
+    const bool rootIsDir = rootOpen && root.isDirectory();
+    if (rootOpen) root.close();
+
+    struct stat info {};
+    const int vfsStat = stat("/sd", &info);
+    Serial.printf(
+        "[OBSIDIA][SD][STATE] stage=%s mounted=%d type=%u sectors=%u sectorSize=%u "
+        "cardSize=0x%08lX%08lX rootExists=%d rootOpen=%d rootDir=%d vfsStat=%d errno=%d\n",
+        stage,
+        sdcardMounted,
+        static_cast<unsigned>(type),
+        static_cast<unsigned>(SD.numSectors()),
+        static_cast<unsigned>(SD.sectorSize()),
+        static_cast<unsigned long>(cardSize >> 32U),
+        static_cast<unsigned long>(cardSize & 0xFFFFFFFFULL),
+        rootExists,
+        rootOpen,
+        rootIsDir,
+        vfsStat,
+        vfsStat == 0 ? 0 : errno
+    );
 }
 #endif
 
@@ -126,32 +158,23 @@ bool setupSdCard(uint8_t maxFiles) {
         if (bus != nullptr && bus != &sdcardSPI) {
             Serial.println("SDCard in the same Bus as TFT, using TFT SPI instance");
 #ifdef OBSIDIA_V1
-            // Breadboard wiring and passive breakouts need the SD-defined
-            // identification clock. Keep the mounted card at this conservative
-            // speed until the replacement hardware passes the standalone
-            // 4 MHz stress test.
-            constexpr uint32_t kObsidiaSdInitHz = 400000UL;
-            constexpr uint8_t kObsidiaSdMountAttempts = 3;
+            // Shared-SPI cards: mount at 400 kHz for identification, keep at 4 MHz.
+            // The standalone diagnostic remounts because it tests stress at 4 MHz.
+            // Bruce only needs to read files after boot, so keep the initial mount.
+            constexpr uint32_t kObsidiaSdOperHz = 4000000UL;
             bool mounted = false;
-            for (uint8_t attempt = 1; attempt <= kObsidiaSdMountAttempts; ++attempt) {
-                pinMode(TFT_CS, OUTPUT);
-                digitalWrite(TFT_CS, HIGH);
-                pinMode(bruceConfigPins.SDCARD_bus.cs, OUTPUT);
-                digitalWrite(bruceConfigPins.SDCARD_bus.cs, HIGH);
-                delay(20);
-                if (attempt == 1) obsidiaProbeSdCmd0(*bus, bruceConfigPins.SDCARD_bus.cs);
-                Serial.printf(
-                    "[OBSIDIA][SD] mount attempt=%u/%u frequency=%lu Hz\n",
-                    attempt,
-                    kObsidiaSdMountAttempts,
-                    static_cast<unsigned long>(kObsidiaSdInitHz)
-                );
-                if (SD.begin(bruceConfigPins.SDCARD_bus.cs, *bus, kObsidiaSdInitHz, "/sd", maxFiles)) {
-                    mounted = true;
-                    break;
-                }
-                SD.end();
-                delay(250);
+            pinMode(TFT_CS, OUTPUT);
+            digitalWrite(TFT_CS, HIGH);
+            pinMode(bruceConfigPins.SDCARD_bus.cs, OUTPUT);
+            digitalWrite(bruceConfigPins.SDCARD_bus.cs, HIGH);
+            delay(20);
+            Serial.printf(
+                "[OBSIDIA][SD] mount frequency=%lu Hz\n",
+                static_cast<unsigned long>(kObsidiaSdOperHz)
+            );
+            if (SD.begin(bruceConfigPins.SDCARD_bus.cs, *bus, kObsidiaSdOperHz, "/sd", maxFiles)) {
+                mounted = true;
+                Serial.println("[OBSIDIA][SD] mount OK");
             }
             if (!mounted) {
 #else
@@ -199,6 +222,9 @@ bool setupSdCard(uint8_t maxFiles) {
     } else {
         Serial.println("SDCARD mounted successfully");
         sdcardMounted = true;
+#ifdef OBSIDIA_V1
+        obsidiaLogSdState("after-mount");
+#endif
         return true;
     }
 }
@@ -699,14 +725,16 @@ String loopSD(FS &fs, bool filePicker, const String &allowed_ext, String rootPat
     if (!fs.exists(rootPath)) {
         Serial.println("loopSD-> 1st exist test failed");
 #ifdef OBSIDIA_V1
-        // sdcardMounted records the last successful mount, not the current
-        // health of the SPI/FS object. Remount once after a failed probe.
-        if (&fs == &SD) {
-            Serial.println("[OBSIDIA][FILES] SD root unavailable; remounting");
-            closeSdCard();
-            delay(20);
-            setupSdCard();
-        }
+        // On shared-SPI hardware, the card enters SPI mode during the first
+        // successful mount in setup() and remains in that state until power is
+        // removed. Calling SD.end() followed by SD.begin() after the card is
+        // already operational leaves it in an undefined state that software
+        // reset cannot recover. If the initial mount succeeded but the root path
+        // is now unavailable, the card itself is likely removed or the filesystem
+        // is corrupt; remounting will not fix either case and will prevent
+        // subsequent cold-boot access. Skip remount and fall through to the
+        // failure path.
+        Serial.println("[OBSIDIA][FILES] SD root unavailable; skipping remount on shared SPI");
 #endif
         rootPath = "/";
         if (!fs.exists(rootPath)) {

@@ -21,71 +21,6 @@ constexpr uint8_t kKeyRight = 0xB7;
 bool cardKbPresent = false;
 uint8_t activeCardKbKey = 0;
 
-void probeSdBreakoutPullups() {
-    constexpr int8_t pins[] = {SDCARD_CS, SDCARD_MOSI, SDCARD_SCK, SDCARD_MISO};
-    constexpr const char *names[] = {"CS", "MOSI", "SCK", "MISO"};
-
-    Serial.println("[OBSIDIA][SD][WIRE] probing passive-breakout pull-ups");
-    for (size_t i = 0; i < sizeof(pins) / sizeof(pins[0]); ++i) pinMode(pins[i], INPUT_PULLDOWN);
-    delay(20);
-    for (size_t i = 0; i < sizeof(pins) / sizeof(pins[0]); ++i) {
-        Serial.printf(
-            "[OBSIDIA][SD][WIRE] %s GPIO%d=%s\n",
-            names[i],
-            pins[i],
-            digitalRead(pins[i]) == HIGH ? "HIGH (external pull-up detected)" : "LOW (no pull-up detected)"
-        );
-    }
-}
-
-uint8_t transferSdBitBang(uint8_t value) {
-    uint8_t received = 0;
-    for (int8_t bit = 7; bit >= 0; --bit) {
-        digitalWrite(SDCARD_MOSI, (value & (1U << bit)) != 0 ? HIGH : LOW);
-        delayMicroseconds(50);
-        digitalWrite(SDCARD_SCK, HIGH);
-        received = static_cast<uint8_t>((received << 1U) | (digitalRead(SDCARD_MISO) == HIGH ? 1U : 0U));
-        delayMicroseconds(50);
-        digitalWrite(SDCARD_SCK, LOW);
-    }
-    return received;
-}
-
-void probeSdCmd0BitBang() {
-    constexpr uint8_t kCmd0[] = {0x40, 0x00, 0x00, 0x00, 0x00, 0x95};
-
-    pinMode(SDCARD_CS, OUTPUT);
-    pinMode(SDCARD_SCK, OUTPUT);
-    pinMode(SDCARD_MOSI, OUTPUT);
-    pinMode(SDCARD_MISO, INPUT_PULLUP);
-    digitalWrite(SDCARD_CS, HIGH);
-    digitalWrite(SDCARD_SCK, LOW);
-    digitalWrite(SDCARD_MOSI, HIGH);
-    delay(20);
-
-    for (uint8_t i = 0; i < 10; ++i) transferSdBitBang(0xFF);
-    digitalWrite(SDCARD_CS, LOW);
-    for (uint8_t byte : kCmd0) transferSdBitBang(byte);
-
-    uint8_t response = 0xFF;
-    uint8_t responseOffset = 0xFF;
-    for (uint8_t i = 0; i < 32; ++i) {
-        response = transferSdBitBang(0xFF);
-        if ((response & 0x80U) == 0) {
-            responseOffset = i;
-            break;
-        }
-    }
-
-    digitalWrite(SDCARD_CS, HIGH);
-    transferSdBitBang(0xFF);
-    Serial.printf(
-        "[OBSIDIA][SD][BITBANG] cmd0=0x%02X byte=%u at approximately 10 kHz (expected 0x01)\n",
-        response,
-        responseOffset
-    );
-}
-
 bool probeCardKb() {
     Wire.beginTransmission(kCardKbAddress);
     return Wire.endTransmission(true) == 0;
@@ -134,9 +69,6 @@ void publishKey(uint8_t key) {
 } // namespace
 
 void _setup_gpio() {
-    probeSdBreakoutPullups();
-    probeSdCmd0BitBang();
-
     pinMode(TFT_CS, OUTPUT);
     pinMode(SDCARD_CS, OUTPUT);
     digitalWrite(TFT_CS, HIGH);
@@ -156,6 +88,38 @@ void _setup_gpio() {
 }
 
 void _post_setup_gpio() {
+    // OBSIDIA_V1 uses a dedicated HSPI bus for microSD.  Older firmware saved
+    // the original shared-TFT assignment in /brucePins.conf, which is loaded
+    // after the initial SD mount.  Migrate only this board-owned pin group so
+    // subsequent remounts cannot silently fall back to the unstable shared
+    // bus; preserve every other user setting.
+    const BruceConfigPins::SPIPins obsidiaSdPins = {
+        (gpio_num_t)SDCARD_SCK,
+        (gpio_num_t)SDCARD_MISO,
+        (gpio_num_t)SDCARD_MOSI,
+        (gpio_num_t)SDCARD_CS
+    };
+    if (bruceConfigPins.SDCARD_bus.sck != obsidiaSdPins.sck ||
+        bruceConfigPins.SDCARD_bus.miso != obsidiaSdPins.miso ||
+        bruceConfigPins.SDCARD_bus.mosi != obsidiaSdPins.mosi ||
+        bruceConfigPins.SDCARD_bus.cs != obsidiaSdPins.cs) {
+        Serial.printf(
+            "[OBSIDIA][SD] migrating saved pins to SCK=%d MISO=%d MOSI=%d CS=%d\n",
+            obsidiaSdPins.sck,
+            obsidiaSdPins.miso,
+            obsidiaSdPins.mosi,
+            obsidiaSdPins.cs
+        );
+        bruceConfigPins.setSDCardPins(obsidiaSdPins);
+    }
+    if (bruceConfigPins.irTx == SDCARD_CS) {
+        Serial.printf(
+            "[OBSIDIA][IR] disabling saved IR TX GPIO%d: pin is microSD CS\n",
+            bruceConfigPins.irTx
+        );
+        bruceConfigPins.setIrTxPin(-1);
+    }
+
     // The persisted Bruce setting is loaded after _setup_gpio(). This panel
     // needs the opposite ST7735 inversion state from the controller default.
     // Persist it once so the Bruce Config switch also shows the real state.

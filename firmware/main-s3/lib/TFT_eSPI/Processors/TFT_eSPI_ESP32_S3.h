@@ -513,6 +513,18 @@ SPI3_HOST = 2
 ////////////////////////////////////////////////////////////////////////////////////////
 // Macros to write commands/pixel colour data to a SPI ILI948x TFT
 ////////////////////////////////////////////////////////////////////////////////////////
+#elif defined(TFT_SPI_USE_ARDUINO_TRANSFERS)
+
+  // Shared-bus compatibility path. Keep transfers inside SPIClass instead of
+  // using the ESP32-S3 register-level fast path below.
+  #define tft_Write_8(C)     spi.transfer((uint8_t)(C))
+  #define tft_Write_16(C)    spi.write16((uint16_t)(C))
+  #define tft_Write_16N(C)   tft_Write_16(C)
+  #define tft_Write_16S(C)   spi.write16((uint16_t)(((C) << 8) | ((C) >> 8)))
+  #define tft_Write_32(C)    spi.write32((uint32_t)(C))
+  #define tft_Write_32C(C,D) spi.write32(((uint32_t)(C) << 16) | (uint16_t)(D))
+  #define tft_Write_32D(C)   spi.write32(((uint32_t)(C) << 16) | (uint16_t)(C))
+
 #elif  defined (SPI_18BIT_DRIVER) // SPI 18-bit colour
 
   // Write 8 bits to TFT

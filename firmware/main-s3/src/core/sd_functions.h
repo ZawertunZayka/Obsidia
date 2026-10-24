@@ -17,6 +17,9 @@ struct FileList {
 bool setupLittleFS(uint8_t maxFiles = 3);
 
 bool setupSdCard(uint8_t maxFiles = 3);
+#ifdef OBSIDIA_V1
+void obsidiaLogSdState(const char *stage);
+#endif
 
 void closeSdCard();
 

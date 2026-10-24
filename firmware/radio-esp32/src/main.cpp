@@ -46,6 +46,12 @@ void sendFrame(Command command, const std::uint8_t *payload, std::size_t payload
         return;
     }
     linkSerial.write(txBuffer.data(), encodedLength);
+    Serial.printf(
+        "[LINK][TX] command=0x%02X payload=%u bytes=%u\n",
+        static_cast<unsigned>(command),
+        static_cast<unsigned>(payloadLength),
+        static_cast<unsigned>(encodedLength)
+    );
 }
 
 void sendError(std::uint8_t requestCommand, ErrorCode error) {
@@ -119,6 +125,11 @@ void pollLink() {
             static_cast<std::uint8_t>(linkSerial.read()), millis(), frame, parseError
         );
         if (event == ParseEvent::FrameReady) {
+            Serial.printf(
+                "[LINK][RX] command=0x%02X payload=%u\n",
+                static_cast<unsigned>(frame.command),
+                static_cast<unsigned>(frame.payloadLength)
+            );
             handleRequest(frame);
         } else if (event == ParseEvent::Error) {
             Serial.printf("[ERROR] ObsidiaLink parser error=%u\n", static_cast<unsigned>(parseError));
