@@ -30,6 +30,12 @@
    - Исходный модуль Bruce `RFID` -> `Read 125kHz` задействует `Rdm6300Parser` и `HardwareSerial`.
    - Распиновка подключения (VCC=5V, GND=GND, TX=GPIO4) зафиксирована.
 
+5. **NRF24L01+ на радиосопроцессоре**:
+   - Диагностика на HW-394 прошла физически: `STATUS=0E`, `CONFIG=08`,
+     `RF_CH=02`, `RF_SETUP=0F`.
+   - Основная прошивка `obsidia-radio` запускает эту диагностику при старте и
+     выставляет NRF24 ready bit в `GET_STATUS` только после успешного теста.
+
 ## Подтверждённое железо и GPIO (`hardware/pinout/pinmap.md`)
 
 - **ESP32-S3 N16R8**: `/dev/ttyACM0`

@@ -1,6 +1,6 @@
 # Current status
 
-Updated: 2026-09-19
+Updated: 2026-10-24
 
 ## Current plan position
 
@@ -39,10 +39,11 @@ protocol hardening is active.
   no RF operation is enabled and all GPIO remain unset.
 - NRF24L01+ standalone diagnostic validates STATUS/register reserved bits and a
   reversible RF_CH write with CE held low; it performs no receive/transmit work.
-  For the photographed HW-394 radio ESP32 DevKit, diagnostic pins are now
-  assigned as SCK=18, MISO=19, MOSI=23, CSN=21, CE=22 (IRQ unused). The
-  diagnostic builds successfully; no radio ESP32 serial port was available for
-  flashing and no physical register response has been observed yet.
+  For the photographed HW-394 radio ESP32 DevKit, pins are assigned as
+  SCK=18, MISO=19, MOSI=23, CSN=21, CE=22 (IRQ unused). The diagnostic passed
+  on hardware with STATUS=0x0E, CONFIG=0x08, RF_CH=0x02 and RF_SETUP=0x0F.
+  The main radio firmware now runs this bounded diagnostic at boot and reports
+  the NRF24 ready bit through ObsidiaLink.
 - ESP32-S3 board-identity firmware is prepared in safe/no-PSRAM and N16R8 probe
   variants; both compile and use no peripheral GPIO.
 - ST7735 VER 1.0 module identified from front/back photos. Its 3.3 V-only raw
@@ -123,7 +124,7 @@ protocol hardening is active.
 | CC1101 diagnostic | pass | host/build | Failure paths and register restoration tested; ESP32 build succeeds |
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
-| NRF24 hardware | pending physical test | build only | Assigned GPIO18/19/23/21/22; diagnostic builds; PA/LNA register response not yet observed |
+| NRF24 hardware | pass | connected | Standalone diagnostic passed on assigned GPIO18/19/23/21/22; register response observed; main firmware reports ready bit |
 | S3 identity diagnostic | pass | connected | N16R8 image flashed; 16 MB QIO/80 MHz flash and initialized 8 MB PSRAM reported |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pass | connected | Repeated PING/ACK, version 0.1.0 and status 0x00/0x07 observed in both MCU logs |
