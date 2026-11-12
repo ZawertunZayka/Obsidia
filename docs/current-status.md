@@ -10,12 +10,11 @@ At the user's direction, bring-up resumed at **Stage 9: ESP32-S3 to ESP32-WROOM
 UART**. The physical ObsidiaLink discovery sequence passes in both directions;
 remote NRF24 Spectrum remains under verification.
 
-Current parallel maintenance: Bruce was updated to upstream 1.17 and the
-`OBSIDIA_V1` image now builds. NRF Spectrum uses the 1.17 plot renderer, and
-RadioService access is serialized between the input task and synchronous remote
-NRF24 requests. Physical verification of the new screen and whether the remote
-link error is gone is pending: this session cannot see `/dev/ttyACM0` or
-`/dev/ttyUSB0`.
+Current parallel maintenance: Bruce was updated to upstream 1.17, built and
+flashed. The user confirms the remote NRF24 Spectrum works, but cannot exit its
+full-screen view. The view now accepts either CardKB Escape or Left; this small
+navigation change is built and flashed; physical confirmation of Left/Escape
+exit is still pending.
 
 ## Completed
 
@@ -30,11 +29,11 @@ link error is gone is pending: this session cannot see `/dev/ttyACM0` or
   while retaining confirmed N16R8 memory, display, CardKB, SD and UART settings.
 - NRF Spectrum now uses Bruce 1.17's `SpectrumPlot` trace, peak-hold and
   waterfall/ruler renderer. The former bar-and-label renderer was too narrow
-  and crowded the small display. Its on-device appearance remains unverified.
+  and crowded the small display. The user confirms the updated graph and remote
+  radio work on the device.
 - The S3 radio runtime now guards the shared UART service with a FreeRTOS mutex
   so the background CardKB/input task cannot consume synchronous Spectrum
-  replies. Host protocol tests pass; latest physical behavior still needs a
-  serial capture.
+  replies. Host protocol tests pass, and the user confirms the Spectrum works.
 - DOOM has been removed from the production Bruce firmware; the repository's
   `test_no_doom.py` guard passes.
 - Generic Bruce `esp32-s3-devkitc-1-psram` control build passes after making the
@@ -136,7 +135,7 @@ link error is gone is pending: this session cannot see `/dev/ttyACM0` or
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
 | NRF24 hardware | pass | connected | Standalone diagnostic passed on assigned GPIO18/19/23/21/22; register response observed; main firmware reports ready bit |
-| Remote NRF24 Spectrum UI | pending physical check | none in current session | Mutex fix and Bruce 1.17 graph compile; no current USB serial port available for flash/log/screen confirmation |
+| Remote NRF24 Spectrum UI | graph/link pass; exit awaiting confirmation | user observation + flash hash | Graph and remote radio work; Left-arrow exit was added alongside Escape/Backspace and uploaded |
 | S3 identity diagnostic | pass | connected | N16R8 image flashed; 16 MB QIO/80 MHz flash and initialized 8 MB PSRAM reported |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pass | connected | Repeated PING/ACK, version 0.1.0 and status 0x00/0x07 observed in both MCU logs |

@@ -149,7 +149,10 @@ void nrf_spectrum() {
     uint32_t lastFrame = 0;
     uint32_t lastRow = 0;
     bool remoteFailure = false;
-    while (!check(EscPress)) {
+    // CardKB's Escape/backspace bytes set EscPress; the left arrow sets
+    // PrevPress. Accept both conventions so the compact keypad can leave this
+    // full-screen view without needing a separate hardware Back button.
+    while (!check(EscPress) && !check(PrevPress)) {
 #ifdef OBSIDIA_V1
         if (!scanRemoteChannels()) {
             remoteFailure = true;
