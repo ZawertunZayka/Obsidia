@@ -1,18 +1,18 @@
 # Bruce upstream snapshot
 
-- Upstream project: Bruce firmware (`BruceDevices/firmware`)
-- Supplied release: 1.16.1
-- Imported on: 2026-09-03
-- Local source: `/home/zawe/Загрузки/firmware-1.16.1(1)/firmware-1.16.1`
-- Source Git metadata: unavailable (the supplied archive is not a Git tree)
+- Upstream project: https://github.com/BruceDevices/firmware
+- Imported release: 1.17
+- Upstream commit: `2b6ba4d490bfcf94ce2574c6154537dbd5838c3d`
+- Imported on: 2026-11-12
+- Previous baseline: supplied Bruce 1.16.1 archive, imported 2026-09-03
 - License: GNU AGPL-3.0; see `LICENSE`
 
-This directory is a buildable vendor snapshot. The import intentionally excludes
-upstream `media/`, `pcbs/`, `.github/`, `.vscode/`, Docker files and SD sample
-payloads because they are not needed to build Obsidia and PCB work is out of
-scope. `BRUCE_README.md` is the upstream README.
+The buildable firmware source follows upstream Bruce 1.17. Git metadata, CI
+configuration, Docker files, media, PCB files and sample SD payloads remain
+excluded. Upstream submodule contents needed for PlatformIO are vendored as
+regular source files so this project stays self-contained.
 
-Obsidia changes use the board directory `boards/obsidia-v1` and named service
-code under `src/obsidia`. Update the vendor snapshot by comparing a new release
-against this commit, then reapplying/reviewing only those paths. Never overwrite
-Obsidia paths blindly.
+Obsidia-specific code remains in `boards/OBSIDIA_V1`, `src/obsidia`, the shared
+`../common/obsidialink` library, and the standalone diagnostic folders. Changes
+to upstream files are reviewed merges against the 1.16.1 baseline; preserve
+those board integrations when refreshing Bruce again.

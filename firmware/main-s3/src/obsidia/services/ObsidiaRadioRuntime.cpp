@@ -5,6 +5,8 @@
 #include "ArduinoTransports.hpp"
 
 #include <Arduino.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 #ifndef OBSIDIA_RADIO_RX_GPIO
 #error "OBSIDIA_RADIO_RX_GPIO must be defined for OBSIDIA_V1"
@@ -20,15 +22,21 @@ constexpr std::uint32_t kRadioBaud = 115200;
 HardwareSerial radioSerial(1);
 ArduinoRadioTransport radioTransport(radioSerial);
 RadioService radioService(radioTransport);
+SemaphoreHandle_t radioMutex = nullptr;
 bool started = false;
 std::uint32_t reportedDiscoveries = 0;
-bool failureReported = false;
+std::uint32_t reportedLinkFailures = 0;
 bool readyReported = false;
 
 } // namespace
 
 void beginRadioRuntime() {
     if (started) return;
+    radioMutex = xSemaphoreCreateMutex();
+    if (radioMutex == nullptr) {
+        Serial.println("[OBSIDIA][RADIO][ERROR] mutex creation failed; UART runtime disabled");
+        return;
+    }
     radioSerial.setRxBufferSize(link::kMaxFrameSize * 4U);
     radioSerial.begin(
         kRadioBaud, SERIAL_8N1, OBSIDIA_RADIO_RX_GPIO, OBSIDIA_RADIO_TX_GPIO
@@ -45,12 +53,12 @@ void beginRadioRuntime() {
 }
 
 void pollRadioRuntime() {
-    if (!started) return;
+    if (!started || radioMutex == nullptr || xSemaphoreTake(radioMutex, 0) != pdTRUE) return;
     radioService.poll(millis());
-    const auto &snapshot = radioService.snapshot();
+    const auto snapshot = radioService.snapshot();
+    xSemaphoreGive(radioMutex);
     if (snapshot.successfulDiscoveries != reportedDiscoveries) {
         reportedDiscoveries = snapshot.successfulDiscoveries;
-        failureReported = false;
     }
     if (snapshot.successfulDiscoveries != 0 && !readyReported) {
         readyReported = true;
@@ -65,8 +73,8 @@ void pollRadioRuntime() {
             static_cast<unsigned>(snapshot.successfulDiscoveries)
         );
     }
-    if (snapshot.linkFailures != 0 && !failureReported) {
-        failureReported = true;
+    if (snapshot.linkFailures != reportedLinkFailures) {
+        reportedLinkFailures = snapshot.linkFailures;
         readyReported = false;
         Serial.printf(
             "[OBSIDIA][RADIO][ERROR] link failure=%u count=%u; rediscovery active\n",
@@ -76,8 +84,12 @@ void pollRadioRuntime() {
     }
 }
 
-const RadioService::Snapshot &radioRuntimeSnapshot() {
-    return radioService.snapshot();
+RadioService::Snapshot radioRuntimeSnapshot() {
+    if (!started || radioMutex == nullptr) return {};
+    if (xSemaphoreTake(radioMutex, portMAX_DELAY) != pdTRUE) return {};
+    const auto snapshot = radioService.snapshot();
+    xSemaphoreGive(radioMutex);
+    return snapshot;
 }
 
 namespace {
@@ -87,8 +99,13 @@ bool remoteRequest(
     std::size_t payloadLength,
     link::Frame &response
 ) {
-    return started && radioService.snapshot().health == RadioService::Health::Ready &&
-           radioService.request(command, payload, payloadLength, response, millis());
+    if (!started || radioMutex == nullptr || xSemaphoreTake(radioMutex, portMAX_DELAY) != pdTRUE) {
+        return false;
+    }
+    const bool ok = radioService.snapshot().health == RadioService::Health::Ready &&
+                    radioService.request(command, payload, payloadLength, response, millis());
+    xSemaphoreGive(radioMutex);
+    return ok;
 }
 }
 
@@ -115,8 +132,23 @@ bool remoteNrf24SetChannel(std::uint8_t channel) {
 bool remoteNrf24ReadRpd(std::uint8_t channel, std::uint8_t &rpd) {
     const std::uint8_t payload[] = {channel};
     link::Frame response;
-    if (!remoteRequest(link::Command::Nrf24Rpd, payload, sizeof(payload), response) ||
-        response.command != link::Command::Data || response.payloadLength != 3) return false;
+    if (!remoteRequest(link::Command::Nrf24Rpd, payload, sizeof(payload), response)) {
+        Serial.printf("[OBSIDIA][NRF24] RPD request failed channel=%u\n", channel);
+        return false;
+    }
+    if (response.command != link::Command::Data || response.payloadLength != 3 ||
+        response.payload[0] != static_cast<std::uint8_t>(link::Command::Nrf24Rpd) ||
+        response.payload[1] != link::kProtocolVersion) {
+        Serial.printf(
+            "[OBSIDIA][NRF24] RPD response invalid channel=%u command=0x%02X length=%u request=0x%02X version=%u\n",
+            channel,
+            static_cast<unsigned>(response.command),
+            static_cast<unsigned>(response.payloadLength),
+            response.payloadLength > 0 ? response.payload[0] : 0,
+            response.payloadLength > 1 ? response.payload[1] : 0
+        );
+        return false;
+    }
     rpd = response.payload[2];
     return true;
 }

@@ -124,6 +124,8 @@ void testRemoteNrf24Request() {
         0x02,
         0x0f,
     };
+    const std::uint8_t staleAck[] = {0x01, obsidia::link::kProtocolVersion};
+    transport.inject(obsidia::link::Command::Ack, staleAck, sizeof(staleAck));
     transport.inject(obsidia::link::Command::Data, status, sizeof(status));
     obsidia::link::Frame response;
     assert(service.request(
@@ -135,6 +137,38 @@ void testRemoteNrf24Request() {
     assert(response.payload[4] == 0x02);
 }
 
+void testRemoteRequestDuringHeartbeat() {
+    MockTransport transport;
+    obsidia::RadioService service(transport);
+    service.begin(0);
+    completeDiscovery(transport, service, 1);
+
+    service.poll(2003);
+    assert(transport.lastCommand() == obsidia::link::Command::Ping);
+
+    const std::uint8_t heartbeatAck[] = {0x01, obsidia::link::kProtocolVersion};
+    const std::uint8_t version[] = {0x02, obsidia::link::kProtocolVersion, 0, 1, 0};
+    const std::uint8_t status[] = {0x03, obsidia::link::kProtocolVersion, 0x05, 0x07};
+    const std::uint8_t rpd[] = {
+        static_cast<std::uint8_t>(obsidia::link::Command::Nrf24Rpd),
+        obsidia::link::kProtocolVersion,
+        1,
+    };
+    transport.inject(obsidia::link::Command::Ack, heartbeatAck, sizeof(heartbeatAck));
+    transport.inject(obsidia::link::Command::Data, version, sizeof(version));
+    transport.inject(obsidia::link::Command::Data, status, sizeof(status));
+    transport.inject(obsidia::link::Command::Data, rpd, sizeof(rpd));
+
+    const std::uint8_t channel[] = {42};
+    obsidia::link::Frame response;
+    assert(service.request(
+        obsidia::link::Command::Nrf24Rpd, channel, sizeof(channel), response, 2010
+    ));
+    assert(response.command == obsidia::link::Command::Data);
+    assert(response.payload[0] == static_cast<std::uint8_t>(obsidia::link::Command::Nrf24Rpd));
+    assert(service.snapshot().health == obsidia::RadioService::Health::Ready);
+}
+
 } // namespace
 
 int main() {
@@ -142,6 +176,7 @@ int main() {
     testTimeoutRetriesAndRecovery();
     testProtocolMismatchAndWriteFailure();
     testRemoteNrf24Request();
+    testRemoteRequestDuringHeartbeat();
     std::cout << "RadioService tests passed\n";
     return 0;
 }

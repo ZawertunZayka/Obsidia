@@ -2,11 +2,11 @@
 
 ## Source and version
 
-The supplied source is the extracted directory
-`/home/zawe/Загрузки/firmware-1.16.1(1)/firmware-1.16.1`. It is not a Git working
-tree. The archive name identifies Bruce 1.16.1; the source itself uses the
-build-time `BRUCE_VERSION` macro and defaults it to `dev`, so the archive name is
-currently the only local release-version evidence.
+The initial integration was based on the supplied Bruce 1.16.1 directory
+`/home/zawe/Загрузки/firmware-1.16.1(1)/firmware-1.16.1`. On 2026-11-12 the
+vendored firmware was updated from the official Bruce repository to release
+1.17, upstream commit `2b6ba4d490bfcf94ce2574c6154537dbd5838c3d`. See
+`firmware/main-s3/OBSIDIA_UPSTREAM.md` for the import boundary and provenance.
 
 Bruce is AGPL-3.0 licensed. The controlled integration will retain its license
 and notices and record the source path/version. Obsidia-specific commits and
@@ -14,12 +14,11 @@ board files remain identifiable in this repository.
 
 ## Build and layout
 
-Bruce uses PlatformIO with Arduino-ESP32. `platformio.ini` loads board fragments
-from `boards/*.ini` and `boards/*/*.ini`; board-local `interface.cpp` implements
-hardware hooks while flags define display, storage and peripheral pins. Core code
-is under `src/core`, feature implementations under `src/modules`, bundled
-libraries under `lib`, and custom PlatformIO board JSON files under
-`boards/_boards_json`.
+Bruce uses PlatformIO with Arduino-ESP32. In 1.17 board definitions are loaded
+from `boards/_jsonfiles`; board-local `interface.cpp` implements hardware hooks
+while INI fragments define display, storage and peripheral pins. Core code is
+under `src/core`, feature implementations under `src/modules`, and bundled or
+vendored library sources under `lib`.
 
 Shared headers live in the small top-level `include` directory, alongside
 core/modules and board-local headers.
@@ -62,8 +61,8 @@ inherit directly.
 
 ## Obsidia extension points
 
-Create an `OBSIDIA_V1` board directory and PlatformIO environment derived from
-the generic PSRAM target only after board identity and pins are confirmed. Its
+The `OBSIDIA_V1` board directory and PlatformIO environment are derived from
+the upstream generic `esp32s3` target, with confirmed N16R8 memory settings. Its
 `interface.cpp` should own display/input initialization and delegate radio/FPGA
 transport to board-specific services. Local PN532, IR and SD should reuse Bruce
 bus and feature modules. CC1101 and NRF24 execution must be redirected through
@@ -98,3 +97,9 @@ The imported `patch.py` required one compatibility fix: it now resolves
 invoking a removed legacy package name. It also fails before replacing
 `libnet80211.a` if patch generation fails. This is an Obsidia-maintained build
 fix, not a board-specific hardware change.
+
+The Bruce 1.17 update also replaces the NRF Spectrum screen with upstream's
+`SpectrumPlot` graph (trace, peak hold and waterfall/ruler). Obsidia's remote
+NRF24 measurements feed that graph. This removes the prior narrow bar plot and
+overlapping per-channel numeric labels. The `OBSIDIA_V1` PlatformIO build
+passes; the graph's appearance still needs confirmation on the physical screen.

@@ -8,7 +8,7 @@ namespace obsidia {
 
 void beginRadioRuntime();
 void pollRadioRuntime();
-const RadioService::Snapshot &radioRuntimeSnapshot();
+RadioService::Snapshot radioRuntimeSnapshot();
 
 struct RemoteNrf24Status {
     std::uint8_t status{0};

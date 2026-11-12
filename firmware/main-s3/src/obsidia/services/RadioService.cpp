@@ -26,7 +26,28 @@ bool RadioService::request(
         std::uint8_t byte = 0;
         if (transport_.read(byte)) {
             const auto event = parser.feed(byte, nowMs, response, parseError);
-            if (event == link::ParseEvent::FrameReady) return true;
+            if (event == link::ParseEvent::FrameReady) {
+                // Background discovery/heartbeat replies can still be queued
+                // when a synchronous peripheral request starts. Never treat
+                // an unrelated valid frame as this request's answer.
+                if ((response.command == link::Command::Ack ||
+                     response.command == link::Command::Data ||
+                     response.command == link::Command::Error) &&
+                    response.payloadLength >= 2 &&
+                    response.payload[0] == static_cast<std::uint8_t>(command) &&
+                    response.payload[1] == link::kProtocolVersion) {
+                    return true;
+                }
+                // A periodic heartbeat may be in flight while the caller
+                // waits for a peripheral response. Advance that state machine
+                // instead of consuming its reply and making the link time out.
+                if (phase_ != Phase::Idle && response.payloadLength >= 2 &&
+                    response.payload[0] == static_cast<std::uint8_t>(commandFor(phase_)) &&
+                    response.payload[1] == link::kProtocolVersion) {
+                    handleFrame(response, nowMs);
+                }
+                parser.reset();
+            }
             if (event == link::ParseEvent::Error) return false;
         }
         transport_.idle();

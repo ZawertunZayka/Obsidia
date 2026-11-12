@@ -1,14 +1,21 @@
 # Current status
 
-Updated: 2026-10-24
+Updated: 2026-11-12
 
 ## Current plan position
 
-Stages 1-5 are complete. Stage 6 microSD remains blocked before CMD0 by the
-current card/socket path. At the user's direction, bring-up resumed at
-**Stage 9: ESP32-S3 to ESP32-WROOM UART**. The physical ObsidiaLink discovery
-sequence now passes in both directions; Stage 9 is complete and Stage 10
-protocol hardening is active.
+Stages 1-5 are complete. The earlier microSD failure was on the previous pin
+assignment; the user now reports the module works after wiring it to GPIO18/3/46/17.
+At the user's direction, bring-up resumed at **Stage 9: ESP32-S3 to ESP32-WROOM
+UART**. The physical ObsidiaLink discovery sequence passes in both directions;
+remote NRF24 Spectrum remains under verification.
+
+Current parallel maintenance: Bruce was updated to upstream 1.17 and the
+`OBSIDIA_V1` image now builds. NRF Spectrum uses the 1.17 plot renderer, and
+RadioService access is serialized between the input task and synchronous remote
+NRF24 requests. Physical verification of the new screen and whether the remote
+link error is gone is pending: this session cannot see `/dev/ttyACM0` or
+`/dev/ttyUSB0`.
 
 ## Completed
 
@@ -16,8 +23,20 @@ protocol hardening is active.
 - Workspace structure and engineering policy established.
 - Bruce 1.16.1 archive analyzed; generic ESP32-S3 PSRAM target selected as a
   structural, not electrical, base.
-- Buildable Bruce 1.16.1 source snapshot imported into `firmware/main-s3` with
-  provenance, license and explicit Obsidia extension paths.
+- Bruce 1.17 imported from upstream commit
+  `2b6ba4d490bfcf94ce2574c6154537dbd5838c3d`; provenance, license and Obsidia
+  extension paths are recorded in `firmware/main-s3/OBSIDIA_UPSTREAM.md`.
+- The `OBSIDIA_V1` target now follows the upstream `esp32s3` generic board JSON
+  while retaining confirmed N16R8 memory, display, CardKB, SD and UART settings.
+- NRF Spectrum now uses Bruce 1.17's `SpectrumPlot` trace, peak-hold and
+  waterfall/ruler renderer. The former bar-and-label renderer was too narrow
+  and crowded the small display. Its on-device appearance remains unverified.
+- The S3 radio runtime now guards the shared UART service with a FreeRTOS mutex
+  so the background CardKB/input task cannot consume synchronous Spectrum
+  replies. Host protocol tests pass; latest physical behavior still needs a
+  serial capture.
+- DOOM has been removed from the production Bruce firmware; the repository's
+  `test_no_doom.py` guard passes.
 - Generic Bruce `esp32-s3-devkitc-1-psram` control build passes after making the
   upstream net80211 patch step compatible with the pinned modern toolchain.
 - UART and FPGA SPI protocol drafts documented with bounded framing and recovery
@@ -80,19 +99,11 @@ protocol hardening is active.
   symptom and was closed with release 1.16. The Obsidia tree is already based
   on 1.16.1 and includes that release's exFAT-capable framework package, so the
   upstream issue is useful corroboration but is not the missing local fix.
-- A photographed passive eight-pin microSD SPI/SDIO breakout replaces the
-  quarantined buffered adapter as the active SD target. It is assigned to the
-  same SPI GPIO and powered from 3.3 V, with DO2/DO1 left unconnected. A
-  firmware-level 100 kHz raw SPI probe receives `0xFF` for all 32 response
-  bytes after a standards-compliant CMD0; the card is therefore not responding
-  electrically before any filesystem/Bruce code runs. Wiring, card seating,
-  continuity and 3.3 V at the socket require physical verification. A second
-  pre-display GPIO test detects the breakout's external pull-ups on all four
-  SPI lines, proving the breakout is powered and connected to GPIO8/11/12/13.
-  A driver-independent approximately 10 kHz bit-banged CMD0 still returns only
-  `0xFF`; this excludes Bruce, FatFS, SPI frequency and the ESP32 hardware SPI
-  driver, leaving the card-to-socket contact or breakout hardware as the active
-  fault domain.
+- Historical microSD bring-up on GPIO8/11/12/13 returned `0xFF` to CMD0 in both
+  hardware and bit-banged SPI tests. The user later changed the passive
+  eight-pin module wiring to GPIO18/3/46/17 and reported that the setup works.
+  Treat the earlier raw-CMD0 failure as specific to the former assignment; the
+  replacement mapping is recorded in `hardware/pinout/pinmap.md`.
 - Photographed IR hardware is a KY-005-style transmitter-only board. GPIO17 is
   assigned for its protected `S` path and a bounded 38 kHz camera diagnostic is
   prepared; an IR receiver has not yet been identified.
@@ -112,7 +123,7 @@ protocol hardening is active.
 |---|---|---|---|
 | Repository | pass | host | Git worktree and remote inspected |
 | Bruce analysis | pass | host | Local source files inspected; archive is not Git |
-| Bruce control build | pass | build | PlatformIO success; 3,701,374 B flash, 128,320 B RAM |
+| Bruce 1.17 `OBSIDIA_V1` build | pass | build | PlatformIO success; 4,132,042 B flash, 138,416 B RAM |
 | ObsidiaLink codec/parser | pass | host | CRC vector, framing, bounds, timeout, error mapping and resynchronization tests pass |
 | Radio MCU firmware | pass | build/connected | PlatformIO `obsidia-radio` success; 291,460 B flash, 22,308 B RAM; physical request/response logs observed |
 | Main RadioService | pass | host/build | State-machine tests pass and complete Bruce control build succeeds |
@@ -125,6 +136,7 @@ protocol hardening is active.
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
 | NRF24 hardware | pass | connected | Standalone diagnostic passed on assigned GPIO18/19/23/21/22; register response observed; main firmware reports ready bit |
+| Remote NRF24 Spectrum UI | pending physical check | none in current session | Mutex fix and Bruce 1.17 graph compile; no current USB serial port available for flash/log/screen confirmation |
 | S3 identity diagnostic | pass | connected | N16R8 image flashed; 16 MB QIO/80 MHz flash and initialized 8 MB PSRAM reported |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pass | connected | Repeated PING/ACK, version 0.1.0 and status 0x00/0x07 observed in both MCU logs |
@@ -146,8 +158,8 @@ protocol hardening is active.
 | CardKB replacement | pass | connected | Unit CardKB v1.1 ACKs at 0x5F and emitted printable, Enter, Escape and arrow bytes at 3.3 V |
 | microSD diagnostic | pass | build/connected | Retained raw CMD0/CMD8 evidence plus 400 kHz mount retries and 100-cycle 4 MHz stress path |
 | old microSD hardware | failed/quarantined | connected/isolation | Buffered adapter drives MISO low with and without a card; isolated GPIO13 reads high and is healthy; CMD0 never reaches idle |
-| replacement microSD hardware | failed / card-to-socket hardware check required | connected/raw + bit-bang SPI | All breakout pull-ups reach GPIO8/11/12/13, but both 100 kHz hardware-SPI and ~10 kHz bit-bang CMD0 return only `0xFF` |
-| SD stress | pending replacement test | build | Existing bounded 100-cycle diagnostic is compatible with the replacement SPI pinout |
+| replacement microSD hardware | user-reported working | user observation | After changing the passive module to GPIO18/3/46/17, user reported the full setup works; this session did not repeat the physical stress test |
+| SD stress | pending repeatable evidence | build | Existing bounded 100-cycle diagnostic remains available; earlier `0xFF` CMD0 readings were on the previous pin assignment |
 | IR TX diagnostic | pass build/upload / inconclusive hardware | build/connected | N16R8 image and 38 kHz burst logs pass; user saw no light with an uncalibrated phone camera and has no reference remote |
 | IR RX through final stress test | not started | none | Receiver hardware has not been identified |
 
@@ -156,19 +168,3 @@ protocol hardening is active.
 The main board, memory configuration and first external SPI assignment are now
 established. New modules remain gated on an explicit pin-map assignment,
 standalone diagnostic and physical observation before Bruce integration.
-
-## Doom (software integration)
-
-- PrBoom 2.5.0 is integrated as an Obsidia-only Bruce library.
-- A `Games -> DOOM` menu entry and CardKB controls are implemented.
-- Rendering is adapted to the ST7735 at 160x120 without aspect distortion.
-- `doom1-cut.wad` is stored in a dedicated internal-flash partition at
-  `0x600000`; microSD is not used by Doom.
-- The `OBSIDIA_V1` firmware build passes with the integrated engine.
-- The Doom task stack is allocated from PSRAM so it does not depend on Bruce's
-  fragmented internal heap after startup.
-- Dedicated boot mode, display output and gameplay were physically confirmed.
-- The WAD is mapped once for the engine lifetime to prevent intermittent MMU
-  faults while the menu demo loads textures.
-- CardKB arrow keys receive short synthetic holds for practical turning and
-  movement; WASD retains the original momentary behavior.
