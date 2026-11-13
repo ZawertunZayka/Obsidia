@@ -129,7 +129,7 @@ WROOM. The user confirms Spectrum works and exits after the Left/Escape fix.
 | Diagnostics model | pass | host/build | Inventory/mapping/bounds tests pass; S3 object compiles |
 | Diagnostics UI | pass build/upload | connected | `OBSIDIA_V1` menu is linked into the permanent Bruce image |
 | RDM6300 parser/diagnostic | pass | host/build | Framing/checksum/resync/timeout tests and ESP32 build pass |
-| RDM6300 hardware | pending wiring/tag test | user photo | HW-205 identified; GPIO32 RX and 5 V-to-3.3 V divider assigned; no physical tag evidence |
+| RDM6300 hardware | inconclusive | connected; standalone Serial capture | Diagnostic booted and reported `[READY]`; no EM4100 frame/checksum arrived during the 15 s capture with the tag reported at the antenna. Production `obsidia-radio` was restored and flash hash verified. |
 | CC1101 diagnostic | pass | host/build | Failure paths and register restoration tested; ESP32 build succeeds |
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
