@@ -8,10 +8,9 @@ The physical ObsidiaLink link and remote NRF24 Spectrum work, including the new
 Left/Escape exit behavior. **Next: Stage 11, RDM6300 standalone diagnostic.**
 The host parser tests and standalone PlatformIO build pass. The diagnostic was
 flashed and hash-verified on the WROOM, then the production radio image was
-restored and hash-verified. No RDM6300 is connected, so physical tag reading
-has not been tested. GPIO32 is assigned for RX; the reader's exact board
-revision and output level need identification before wiring. The user reports
-the microSD works on GPIO18/3/46/17.
+restored and hash-verified. The user photo identifies the reader as HW-205;
+physical wiring and tag reading remain pending. GPIO32 is assigned for RX with
+a 5.1 kΩ/10 kΩ TX divider. The user reports the microSD works on GPIO18/3/46/17.
 
 Current firmware: Bruce 1.17 on the S3 and ObsidiaLink radio firmware on the
 WROOM. The user confirms Spectrum works and exits after the Left/Escape fix.
@@ -130,7 +129,7 @@ WROOM. The user confirms Spectrum works and exits after the Left/Escape fix.
 | Diagnostics model | pass | host/build | Inventory/mapping/bounds tests pass; S3 object compiles |
 | Diagnostics UI | pass build/upload | connected | `OBSIDIA_V1` menu is linked into the permanent Bruce image |
 | RDM6300 parser/diagnostic | pass | host/build | Framing/checksum/resync/timeout tests and ESP32 build pass |
-| RDM6300 hardware | pending module identification/wiring | no tag attached | Diagnostic image was installed then radio firmware restored; GPIO32 assigned; no physical tag evidence |
+| RDM6300 hardware | pending wiring/tag test | user photo | HW-205 identified; GPIO32 RX and 5 V-to-3.3 V divider assigned; no physical tag evidence |
 | CC1101 diagnostic | pass | host/build | Failure paths and register restoration tested; ESP32 build succeeds |
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |

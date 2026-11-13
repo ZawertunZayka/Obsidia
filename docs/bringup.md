@@ -96,11 +96,14 @@ The standalone reader diagnostic is at
 `firmware/radio-esp32/diagnostics/rdm6300`. It listens on the assigned WROOM
 GPIO32 at 9600 8N1 and validates bounded 14-byte frames, hexadecimal fields,
 XOR checksum, and inter-byte timeout. Host parser tests and the standalone
-PlatformIO diagnostic build pass. The [RDM630 specification](https://files.seeedstudio.com/wiki/125Khz_RFID_module-UART/res/RDM630-Spec.pdf)
-lists a 5 V supply and UART output, but clone boards and connector orientations vary.
-Confirm the actual board markings before wiring, and shift TX to 3.3 V before
-connecting it to the ESP32 input. Keep the radio MCU's production NRF24 firmware
-installed until the standalone RDM6300 physical test is ready to run.
+PlatformIO diagnostic build pass. The user photo identifies the module as HW-205
+and shows labels `VCC`, `GND`, `RX`, `TX`, `ANT1`, and `ANT2`. The
+[RDM630 specification](https://files.seeedstudio.com/wiki/125Khz_RFID_module-UART/res/RDM630-Spec.pdf)
+lists 5 V supply and 9600 8N1 UART. Use a 5.1 kΩ series resistor from module TX
+to a junction, 10 kΩ from that junction to ground, and connect the junction to
+WROOM GPIO32. Connect the antenna coil across ANT1/ANT2. Keep module RX and LED
+unconnected. The standalone diagnostic has been built and flashed; restore the
+radio firmware after the tag-read test.
 
 ## Permanent Bruce target
 
