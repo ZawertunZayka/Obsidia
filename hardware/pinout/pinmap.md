@@ -46,7 +46,7 @@ for its MISO even though this display does not expose one.
 | Function | Module pin | ESP32 DevKit pin/GPIO | Supply | Logic | Status |
 |---|---|---|---|---|---|
 | Master UART | RX/TX | GPIO16/GPIO17 | No power connection; common GND only | 3.3 V UART, 115200 8N1 | Confirmed: PING/version/status RX and ACK/DATA TX pass |
-| RDM6300 | TX/RX if present | TBD | TBD | TBD | Unconfirmed |
+| RDM6300 standalone UART | TX -> RX | GPIO32 | Standard module supply is 5 V; verify exact board before wiring | Shift UART TX to 3.3 V before ESP32 RX | GPIO32 assigned for isolated diagnostic; module revision and physical test unconfirmed |
 | CC1101 SPI | SCLK/MOSI/MISO/CS/GDO0/GDO2 | TBD | TBD | TBD | Unconfirmed |
 | NRF24L01+ PA/LNA | SCK/MISO/MOSI/CSN/CE/IRQ | GPIO18/GPIO19/GPIO23/GPIO21/GPIO22/NC | External regulated 3.3 V, >=250 mA; common GND | 3.3 V | Assigned from photographed HW-394 labels; standalone diagnostic passed on hardware |
 

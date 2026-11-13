@@ -1,20 +1,18 @@
 # Current status
 
-Updated: 2026-11-12
+Updated: 2026-11-13
 
 ## Current plan position
 
-Stages 1-5 are complete. The earlier microSD failure was on the previous pin
-assignment; the user now reports the module works after wiring it to GPIO18/3/46/17.
-At the user's direction, bring-up resumed at **Stage 9: ESP32-S3 to ESP32-WROOM
-UART**. The physical ObsidiaLink discovery sequence passes in both directions;
-remote NRF24 Spectrum remains under verification.
+The physical ObsidiaLink link and remote NRF24 Spectrum work, including the new
+Left/Escape exit behavior. **Next: Stage 11, RDM6300 standalone diagnostic.**
+The host parser tests and standalone PlatformIO build pass; GPIO32 is assigned
+for its RX input, but the reader's exact board revision and output level need
+identification before wiring. The user reports the microSD works on
+GPIO18/3/46/17.
 
-Current parallel maintenance: Bruce was updated to upstream 1.17, built and
-flashed. The user confirms the remote NRF24 Spectrum works, but cannot exit its
-full-screen view. The view now accepts either CardKB Escape or Left; this small
-navigation change is built and flashed; physical confirmation of Left/Escape
-exit is still pending.
+Current firmware: Bruce 1.17 on the S3 and ObsidiaLink radio firmware on the
+WROOM. The user confirms Spectrum works and exits after the Left/Escape fix.
 
 ## Completed
 
@@ -135,7 +133,7 @@ exit is still pending.
 | CC1101 hardware | pending wiring | none | SPI GPIO unset; no physical register evidence |
 | NRF24 diagnostic | pass | host/build | Presence/register failure paths pass; ESP32 build succeeds |
 | NRF24 hardware | pass | connected | Standalone diagnostic passed on assigned GPIO18/19/23/21/22; register response observed; main firmware reports ready bit |
-| Remote NRF24 Spectrum UI | graph/link pass; exit awaiting confirmation | user observation + flash hash | Graph and remote radio work; Left-arrow exit was added alongside Escape/Backspace and uploaded |
+| Remote NRF24 Spectrum UI | pass | user observation + flash hash | Graph and remote radio work; user confirms Left/Escape exits |
 | S3 identity diagnostic | pass | connected | N16R8 image flashed; 16 MB QIO/80 MHz flash and initialized 8 MB PSRAM reported |
 | Main bus adapters | pass | build | Arduino transport object compiles for the S3 control target |
 | Radio UART transport | pass | connected | Repeated PING/ACK, version 0.1.0 and status 0x00/0x07 observed in both MCU logs |

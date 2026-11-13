@@ -90,6 +90,18 @@ ESP32-S3 GPIO to 5 V. The keyboard repeatedly acknowledged address `0x5F` at
 (`0x1B`) and arrow bytes (`0xB4`-`0xB7`) were received, completing the physical
 input test.
 
+## RDM6300 standalone gate
+
+The standalone reader diagnostic is at
+`firmware/radio-esp32/diagnostics/rdm6300`. It listens on the assigned WROOM
+GPIO32 at 9600 8N1 and validates bounded 14-byte frames, hexadecimal fields,
+XOR checksum, and inter-byte timeout. Host parser tests and the standalone
+PlatformIO diagnostic build pass. The [RDM630 specification](https://files.seeedstudio.com/wiki/125Khz_RFID_module-UART/res/RDM630-Spec.pdf)
+lists a 5 V supply and UART output, but clone boards and connector orientations vary.
+Confirm the actual board markings before wiring, and shift TX to 3.3 V before
+connecting it to the ESP32 input. Keep the radio MCU's production NRF24 firmware
+installed until the standalone RDM6300 physical test is ready to run.
+
 ## Permanent Bruce target
 
 `OBSIDIA_V1` is now the only main-board firmware used during continued bring-up.
